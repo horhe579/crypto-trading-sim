@@ -1,13 +1,7 @@
-// headers: []; data: []
 interface Props<T>{
     columns: string[],
-    data: T[],
-    mapToRow: (item: T, index: number) => React.ReactNode,
-    styles?: {
-        header?: string,
-        row?: string,
-        cell?: string
-    }
+    data: T[] | null,
+    mapToRow: (item: T, index: number) => React.ReactNode
 }
 
 function Table<T>({columns, data, mapToRow}: Props<T>) {
@@ -26,7 +20,7 @@ function Table<T>({columns, data, mapToRow}: Props<T>) {
                 </tr>
             </thead>
             <tbody>
-                {data.map((item, index) => mapToRow(item, index))}
+                {data && data.map((item, index) => mapToRow(item, index))}
             </tbody>
         </table>
     </div>
