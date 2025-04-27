@@ -7,22 +7,32 @@ interface Props<T>{
 function Table<T>({columns, data, mapToRow}: Props<T>) {
   return (
     <div className="w-3/5 mx-auto">
-        <table className="w-full border-collapse text-white table-auto">
+        <table className={`w-full border-collapse text-white table-auto ${data ? 'opacity-100 transition-opacity duration-600 ease-out' : 'opacity-0'}`}>
             <thead>
                 <tr>
                     {columns.map((column, index) => (
-                        <th key={index} className={`px-5 pt-4 ${index === 0 ? 'text-left w-1/6' : 
-                            index === 1 ? 'text-center w-1/4' : 
-                            'text-right w-1/4'}`}>
+                        <th 
+                            key={index} 
+                            className={`w-1/${columns.length} px-5 py-3 ${
+                                index === 0 ? 'text-left' : 
+                                index === columns.length - 1 ? 'text-right' : 
+                                'text-center'
+                            }`}
+                        >
                             {column}
                         </th>
                     ))}
                 </tr>
             </thead>
+
             <tbody>
-                {data && data.map((item, index) => mapToRow(item, index))}
+                {data?.map((item, index) => mapToRow(item, index))}
             </tbody>
         </table>
+        
+        {!data && (
+          <div className="text-center font-bold text-xl text-white mt-20">Loading data...</div>
+        )}
     </div>
   )
 }

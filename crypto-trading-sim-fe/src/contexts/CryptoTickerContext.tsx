@@ -1,11 +1,11 @@
 import { createContext, useEffect, useState } from "react"
-import { TopCryptoContextType } from "../types/TopCryptoContextType"
+import { CryptoTickerContextType } from "../types/CryptoTickerContextType"
 import { BaseProviderProps } from "../types/BaseProviderProps"
 import { TickerData } from "../types/TickerData"
 
-export const TopCryptoContext = createContext<TopCryptoContextType | null>(null)
+export const CryptoTickerContext = createContext<CryptoTickerContextType | null>(null)
 
-export const TopCryptoProvider = ({ children }: BaseProviderProps) => {
+export const CryptoTickerProvider = ({ children }: BaseProviderProps) => {
 
     const topCoins = [
         "BTC/USD",
@@ -32,7 +32,7 @@ export const TopCryptoProvider = ({ children }: BaseProviderProps) => {
           
 
     const [ws, setWs] = useState<WebSocket | null>(null)
-    const [prices, setPrices] = useState<Record<string, TickerData>>({})
+    const [ticks, setTicks] = useState<Record<string, TickerData>>({})
 
     const mapToTickerData = (message: any): TickerData => {
         const data = message.data[0];
@@ -42,40 +42,27 @@ export const TopCryptoProvider = ({ children }: BaseProviderProps) => {
             name: coinCode,
             symbol: coinCode,
             highestBid: data.bid,
-            lowestAsk: data.ask
+            lowestAsk: data.ask,
+            last: data.last
         };
     }
 
-    const handleSnapshot = (tickerData: TickerData) => {
-        console.log("Processing snapshot data ")
-        console.log(tickerData)
-        setPrices(prev => ({
-            ...prev,
-            [tickerData.name]: tickerData
-        }))
-    }
-
     const handleUpdate = (tickerData: TickerData) => {
-        console.log("Processing update data ")
-        console.log(tickerData)
-        setPrices(prev => ({
+        console.log("Processing update data ", tickerData)
+        setTicks(prev => ({
             ...prev,
             [tickerData.name]: tickerData
         }))
     }
-
 
     const processWebSocketMessage = (message: any) => {
         if(message?.channel === "ticker" && Array.isArray(message.data)){
             const messageType = message.type;
-            const tickerData = mapToTickerData(message);
 
             switch (messageType) {
-                case "snapshot": {
-                    handleSnapshot(tickerData)
-                    break
-                }
-                case "update": {
+                case "snapshot" : 
+                case "update":{
+                    const tickerData = mapToTickerData(message);
                     handleUpdate(tickerData)
                     break
                 }
@@ -84,7 +71,6 @@ export const TopCryptoProvider = ({ children }: BaseProviderProps) => {
                     break
                 }
             }
-            console.log(message)
         }
     }
 
@@ -118,8 +104,8 @@ export const TopCryptoProvider = ({ children }: BaseProviderProps) => {
     }, [])
 
   return (
-    <TopCryptoContext.Provider value={{ ws, prices }}>
+    <CryptoTickerContext.Provider value={{ ws, ticks }}>
         {children}
-    </TopCryptoContext.Provider>
+    </CryptoTickerContext.Provider>
   )
 }
