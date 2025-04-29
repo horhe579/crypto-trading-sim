@@ -1,36 +1,56 @@
 import { useContext } from "react"
 import Table from "../components/Table"
-import { TickerData } from "../types/TickerData"
 import { CryptoTickerContext } from "../contexts/CryptoTickerContext"
+import { CoinData } from "../types/CoinData"
+import { CoinMetadata } from "../types/CoinMetadata"
+import { MarketCapContext } from "../contexts/MarketCapContext"
+
 
 const Home = () => {
-  const context = useContext(CryptoTickerContext);
+  const tickerContext = useContext(CryptoTickerContext);
+  const marketCapContext = useContext(MarketCapContext);
 
   const columns = [
     "Name",
-    "Symbol", 
     "Price",
     "Highest Bid",
     "Lowest Ask"
   ]
 
-  const data = context?.ticks ? Object.entries(context.ticks).map(([, value]) => {
-    return value; 
+  const topCoins: CoinMetadata[] = marketCapContext?.topCoins ?? [];
+
+  const data: CoinData[] = tickerContext?.ticks ? Object.entries(tickerContext.ticks).map(([, value]) => {
+    const topCoinIndex = topCoins.findIndex(item => item.code === value.coinCode)
+    return {...value, code: value.coinCode, name: topCoins[topCoinIndex]?.name, marketCapRank: topCoins[topCoinIndex]?.marketCapRank, icon: topCoins[topCoinIndex]?.icon}; 
   }) : []
 
-  const mapToRow = (coin: TickerData, index: number) => (
-    <tr key={index} className={index % 2 === 0 ? "bg-gray-900 bg-opacity-40" : "bg-gray-800 bg-opacity-40"}>
-        <td className="border border-gray-700 px-5 py-5">{coin.name}</td>
-        <td className="border border-gray-700 px-5 py-5 text-center">{coin.symbol}</td>
-        <td className="border border-gray-700 px-5 py-5 text-center">{coin.last}</td>
-        <td className="border border-gray-700 px-5 py-5 text-center font-mono">{coin.highestBid}</td>
-        <td className="border border-gray-700 px-5 py-5 text-right font-mono">{coin.lowestAsk}</td>
+  const mapToRow = (coin: CoinData, index: number) => (
+    <tr
+      key={index}
+      className={`${index % 2 === 0 ? "duration-100 bg-gray-100/25 hover:bg-gray-300/25" : "duration-100 bg-gray-.400/25 hover:bg-gray-500/25"}`}
+    >
+      <td
+        className={`p-5 ${index === data.length - 1 ? "rounded-bl-lg" : ""}`}
+      >
+        <img className="inline-block px-2" width="60px" height="60px" src={coin.icon} />
+        {coin.name + " - " + coin.code}
+      </td>
+      <td className="p-5 text-center">{coin.lastPrice}</td>
+      <td className="p-5 text-center font-mono">{coin.highestBid}</td>
+      <td
+        className={`p-5 text-right font-mono ${
+          index === data.length - 1 ? "rounded-br-lg" : ""
+        }`}
+      >
+        {coin.lowestAsk}
+      </td>
     </tr>
   )
+  
 
   return (
     <div>
-        <h1 className="text-white text-4xl font-bold mb-6 text-center">Crypto Trading Simulator</h1>
+        <h1 className="py-10 text-white text-4xl font-bold mb-6 text-center">Crypto Trading Simulator</h1>
         <Table columns={columns} data={data.length ? data : null} mapToRow={mapToRow}/>
     </div>
   )

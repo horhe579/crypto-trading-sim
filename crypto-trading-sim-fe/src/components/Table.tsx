@@ -1,19 +1,16 @@
-interface Props<T>{
-    columns: string[],
-    data: T[] | null,
-    mapToRow: (item: T, index: number) => React.ReactNode
-}
+import { TableProps } from "../types/TableProps"
+import { TailSpin } from 'react-loading-icons'
 
-function Table<T>({columns, data, mapToRow}: Props<T>) {
+function Table<T>({columns, data, mapToRow}: TableProps<T>) {
   return (
-    <div className="w-3/5 mx-auto">
-        <table className={`w-full border-collapse text-white table-auto ${data ? 'opacity-100 transition-opacity duration-600 ease-out' : 'opacity-0'}`}>
-            <thead>
+    <div className="w-4/5 mx-auto">
+        <table className={`w-full border-collapse text-gray-900 table-auto ${data ? 'rounded-xl bg-white/25 opacity-100 transition-opacity duration-600 ease-out' : 'opacity-0'}`}>
+            <thead className="text-gray-300">
                 <tr>
                     {columns.map((column, index) => (
                         <th 
                             key={index} 
-                            className={`w-1/${columns.length} px-5 py-3 ${
+                            className={`w-1/${columns.length} p-5 ${
                                 index === 0 ? 'text-left' : 
                                 index === columns.length - 1 ? 'text-right' : 
                                 'text-center'
@@ -31,7 +28,7 @@ function Table<T>({columns, data, mapToRow}: Props<T>) {
         </table>
         
         {!data && (
-          <div className="text-center font-bold text-xl text-white mt-20">Loading data...</div>
+          <TailSpin className="mx-auto my-12"/>
         )}
     </div>
   )

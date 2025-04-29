@@ -6,7 +6,7 @@ const App = () => {
   return (
     <MarketCapProvider>
       <CryptoTickerProvider>
-        <div className="bg-gradient-to-b from-blue-800 to-purple-900 min-h-screen w-full">
+        <div className="bg-gradient-to-b from-indigo-900 to-[#0d064d] min-h-screen w-full">
           <Home/>
         </div>
       </CryptoTickerProvider>

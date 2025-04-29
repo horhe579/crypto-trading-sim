@@ -1,35 +1,24 @@
-import { createContext, useEffect, useState } from "react"
-import { CryptoTickerContextType } from "../types/CryptoTickerContextType"
+import { createContext, useContext, useEffect, useState } from "react"
+import { CryptoTickerContextValue } from "../types/CryptoTickerContextValue"
 import { BaseProviderProps } from "../types/BaseProviderProps"
 import { TickerData } from "../types/TickerData"
+import { MarketCapContext } from "./MarketCapContext"
 
-export const CryptoTickerContext = createContext<CryptoTickerContextType | null>(null)
+export const CryptoTickerContext = createContext<CryptoTickerContextValue | null>(null)
 
 export const CryptoTickerProvider = ({ children }: BaseProviderProps) => {
+    const context = useContext(MarketCapContext);
 
-    const topCoins = [
-        "BTC/USD",
-        "ETH/USD",
-        "USDT/USD",
-        "BNB/USD",
-        "SOL/USD",
-        "XRP/USD",
-        "ADA/USD",
-        "DOGE/USD",
-        "TRX/USD",
-        "MATIC/USD",
-        "DOT/USD",
-        "LTC/USD",
-        "AVAX/USD",
-        "SHIB/USD",
-        "TON/USD",
-        "BCH/USD",
-        "LINK/USD",
-        "XLM/USD",
-        "ICP/USD",
-        "ATOM/USD"
-    ]
-          
+    const getTradingPairs = (): string[] => {
+        if (context && context.topCoins && context.topCoins.length > 0) {
+            return context.topCoins.map(coin => `${coin.code}/${context.currency.name.toUpperCase()}`);
+        }
+        
+        return [
+            "BTC/USD",
+            "ETH/USD",
+        ];
+    };    
 
     const [ws, setWs] = useState<WebSocket | null>(null)
     const [ticks, setTicks] = useState<Record<string, TickerData>>({})
@@ -39,11 +28,10 @@ export const CryptoTickerProvider = ({ children }: BaseProviderProps) => {
         const coinCode = data.symbol.split('/')[0];
          
         return {
-            name: coinCode,
-            symbol: coinCode,
+            coinCode: coinCode,
             highestBid: data.bid,
             lowestAsk: data.ask,
-            last: data.last
+            lastPrice: data.last 
         };
     }
 
@@ -51,7 +39,7 @@ export const CryptoTickerProvider = ({ children }: BaseProviderProps) => {
         console.log("Processing update data ", tickerData)
         setTicks(prev => ({
             ...prev,
-            [tickerData.name]: tickerData
+            [tickerData.coinCode]: tickerData
         }))
     }
 
@@ -89,7 +77,7 @@ export const CryptoTickerProvider = ({ children }: BaseProviderProps) => {
 
         websocket.onopen = () => {
             console.log('Kraken ws connection established.')
-            websocket.send(buildWebsocketSubscribeMessage(topCoins))
+            websocket.send(buildWebsocketSubscribeMessage(getTradingPairs()))
         }
 
         websocket.onmessage = (event) => {

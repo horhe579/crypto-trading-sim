@@ -1,7 +1,6 @@
-export interface TickerData {
-    name: string, 
-    symbol: string,
+export type TickerData = {
+    coinCode: string,
     highestBid: number,
     lowestAsk: number,
-    last: number
+    lastPrice: number
 }
