@@ -3,7 +3,7 @@ package com.trading.cryptotradingsim.cryptotradingsimbe.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import static com.trading.cryptotradingsim.cryptotradingsimbe.mapper.ObjectMapperHolder.OBJECT_MAPPER;
+import static com.trading.cryptotradingsim.cryptotradingsimbe.util.ConstantHolder.OBJECT_MAPPER;
 
 public final class JsonUtil {
 

@@ -17,7 +17,7 @@ public class SimpleCoinPriceServiceService implements CoinDataService {
     @Override
     public Double getLastPrice(String currencyPair) {
         TickerData coinData = coinDataRepository.getById(currencyPair)
-                .orElseThrow(() -> new NotFoundException("Price for pair " + currencyPair + " not found"));
+                .orElseThrow(() -> new NotFoundException("Price for pair " + currencyPair + " not available"));
         return coinData.last();
     }
 

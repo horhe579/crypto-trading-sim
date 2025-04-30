@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.trading.cryptotradingsim.cryptotradingsimbe.mapper.ObjectMapperHolder.OBJECT_MAPPER;
+import static com.trading.cryptotradingsim.cryptotradingsimbe.util.ConstantHolder.OBJECT_MAPPER;
 import static com.trading.cryptotradingsim.cryptotradingsimbe.util.JsonUtil.fromMessage;
 import static com.trading.cryptotradingsim.cryptotradingsimbe.util.TickerMessageUtil.parseTickerMessage;
 
@@ -27,10 +27,6 @@ public class KrakenWebSocketClient {
 
     // Persist on BE
     private CoinDataService coinDataService;
-
-    //Forward to FE
-    private CoinPriceBroadcastService broadcastService;
-
 
     @OnOpen
     public void onOpen(Session session) throws JsonProcessingException {
@@ -49,7 +45,7 @@ public class KrakenWebSocketClient {
             TickerMessage tickerMessage = parseTickerMessage(jsonMessage);
             coinDataService.updatePrice(tickerMessage.data().getFirst());
         } catch (JsonProcessingException | IllegalArgumentException e) {
-            log.error("Could not parse a ws message to json, reason {}", e.getMessage());
+            log.warn("Could not parse a ws message to a ticker message, reason {}", e.getMessage());
         }
     }
 }
