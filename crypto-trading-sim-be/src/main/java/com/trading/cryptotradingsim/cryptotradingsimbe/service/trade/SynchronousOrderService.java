@@ -4,10 +4,12 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Order;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.User;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.coin.CoinDataService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.user.UserService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Slf4j
 public class SynchronousOrderService implements OrderService {
 
     private final CoinDataService coinDataService;
@@ -27,9 +29,24 @@ public class SynchronousOrderService implements OrderService {
         buyOrder.setPricePerUnit(currentPrice);
         validateSufficientFunds(buyOrder);
 
-//        UUID orderId = UUID.randomUUID();
-//        OrderResponse response = new OrderResponse(orderId, currentPrice, now);
-        //asyncOrderProcessor.processOrderAsync(orderId, request, currentPrice, now);
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+                UUID userId = buyOrder.getUserId();
+                double totalCost = buyOrder.getAmount() * currentPrice;
+
+                User user = userService.getUser(userId);
+                User updatedUser = new User(
+                        user.getId(),
+                        user.getBalance() - totalCost,
+                        user.getCreatedAt()
+                );
+                userService.updateUser(updatedUser);
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
 
         return buyOrder;
     }
@@ -53,6 +70,7 @@ public class SynchronousOrderService implements OrderService {
 
     private boolean hasSufficientFunds(UUID userId, double amount) {
         User user = userService.getOrCreateUser(userId);
+        log.error("User: {}, Amount: {}", user, amount);
         return user.getBalance() >= amount;
     }
 }

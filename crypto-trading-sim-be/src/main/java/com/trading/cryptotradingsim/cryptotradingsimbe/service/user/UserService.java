@@ -11,7 +11,6 @@ public interface UserService {
 
     User getOrCreateUser(UUID userId);
 
-    // TODO: Do I need to rly expose this?
     User updateUser(User user);
 
     User resetUser(UUID userId);

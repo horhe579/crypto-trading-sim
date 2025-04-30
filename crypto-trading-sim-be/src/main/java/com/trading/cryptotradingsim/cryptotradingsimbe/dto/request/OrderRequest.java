@@ -1,4 +1,6 @@
 package com.trading.cryptotradingsim.cryptotradingsimbe.dto.request;
 
-public record OrderRequest(String currencyPair, Double amount) {
+import com.trading.cryptotradingsim.cryptotradingsimbe.dto.OrderType;
+
+public record OrderRequest(OrderType orderType, String currencyPair, Double amount) {
 }

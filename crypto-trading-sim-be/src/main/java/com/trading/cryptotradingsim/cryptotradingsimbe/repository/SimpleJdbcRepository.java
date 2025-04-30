@@ -4,23 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.trading.cryptotradingsim.cryptotradingsimbe.util.RepositoryUtil.*;
-import static org.apache.commons.beanutils.BeanUtils.setProperty;
 
 @Slf4j
-public class SimpleJdbcRepository<T, ID> implements SimpleRepository<T, ID> {
+public abstract class SimpleJdbcRepository<T, ID> implements SimpleRepository<T, ID> {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<T> rowMapper;
     private final String tableName;
@@ -43,36 +34,6 @@ public class SimpleJdbcRepository<T, ID> implements SimpleRepository<T, ID> {
     }
 
     @Override
-    public T save(T entity) {
-        Map<String, Object> columns = getParameterValues(new BeanPropertySqlParameterSource(entity), idColumn);
-        
-        log.error(Arrays.toString(columns.keySet().toArray(new String[0])));
-        String insertSql = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName(tableName)
-                .usingColumns(columns.keySet().toArray(new String[0]))
-                .getInsertString();
-        log.info("Insert SQL: {}", insertSql);
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(insertSql, new MapSqlParameterSource(columns), keyHolder);
-
-        if (keyHolder.getKey() != null) {
-            try {
-                setProperty(entity, idColumn, keyHolder.getKey());
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(String.format("Failed to set ID property: %s", idColumn), e);
-            }
-        }
-        return entity;
-    }
-
-    @Override
-    public T update(T entity) {
-        //TODO
-        return entity;
-    }
-
-    @Override
     public Optional<T> getById(ID id) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(getByColumnSql(tableName, idColumn), rowMapper, id));
@@ -89,5 +50,29 @@ public class SimpleJdbcRepository<T, ID> implements SimpleRepository<T, ID> {
     @Override
     public void deleteById(ID id) {
         jdbcTemplate.update(deleteByColumnSql(tableName, idColumn), id);
+    }
+
+    protected JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+
+    protected RowMapper<T> getRowMapper() {
+        return rowMapper;
+    }
+
+    protected String getTableName() {
+        return tableName;
+    }
+
+    protected String getIdColumn() {
+        return idColumn;
+    }
+
+    protected Class<T> getEntityType() {
+        return entityType;
+    }
+
+    protected Class<ID> getIdType() {
+        return idType;
     }
 }
