@@ -1,15 +1,21 @@
-# crypto-trading-sim
-mono-repo full stack app allowing users to sim trade crypto with real time data
+Crypto Trading Simulator Setup Guide
+
+Run BE:
+
+Install and configure PostgreSQL
+
+Download or use a docker container, create a database
+
+Create or edit application.properties in your project:
+# Database Configuration
+spring.datasource.url=jdbc:postgresql://localhost:5432/crypto_trading_sim
+spring.datasource.username=postgres
+spring.datasource.password=your_password_here
 
 Run FE:
 
-install node v 23:
-docker pull node:23-alpine
+install node v 23: docker pull node:23-alpine
 
-navigate to project folder and install dep
-npm install
+navigate to project folder and install dep npm install
 
-visit https://cors-anywhere.herokuapp.com/corsdemo and request temp access to a cors proxy server
-
-run react app
-npm run dev
+run react app npm run dev
