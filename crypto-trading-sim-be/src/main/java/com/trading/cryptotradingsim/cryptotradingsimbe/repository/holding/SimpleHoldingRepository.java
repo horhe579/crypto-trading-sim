@@ -32,18 +32,23 @@ public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity,
 
     @Override
     public HoldingEntity save(HoldingEntity entity) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        addSafeParameter(params, "user_id", entity.getUserId());
-        addSafeParameter(params, "cryptocurrency_symbol", entity.getCryptocurrencySymbol());
-        addSafeParameter(params, "quantity", entity.getQuantity());
-        addSafeParameter(params, "average_price", entity.getAveragePrice());
-        addSafeParameter(params, "fiat_currency", entity.getFiatCurrency());
-        addSafeParameter(params, "updated_at", entity.getUpdatedAt());
+        if (entity.getId() == null) {
+            entity.setId(UUID.randomUUID());
+        }
 
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(getJdbcTemplate())
-                .withTableName(getTableName());
-
-        jdbcInsert.execute(params);
+        String sql = "INSERT INTO holdings (id, user_id, cryptocurrency_symbol, quantity, average_price, fiat_currency, updated_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        getJdbcTemplate().update(sql,
+            entity.getId(),
+            entity.getUserId(),
+            entity.getCryptocurrencySymbol(),
+            entity.getQuantity(),
+            entity.getAveragePrice(),
+            entity.getFiatCurrency(),
+            entity.getUpdatedAt()
+        );
+        
         return entity;
     }
 
@@ -65,8 +70,9 @@ public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity,
 
     @Override
     public boolean hasHolding(UUID userId, String cryptocurrencySymbol) {
+        String sql = "SELECT COUNT(*) FROM holdings WHERE user_id = ?::uuid AND cryptocurrency_symbol = ?";
         Integer count = getJdbcTemplate().queryForObject(
-                HAS_HOLDING_SQL,
+                sql,
                 Integer.class,
                 userId.toString(),
                 cryptocurrencySymbol

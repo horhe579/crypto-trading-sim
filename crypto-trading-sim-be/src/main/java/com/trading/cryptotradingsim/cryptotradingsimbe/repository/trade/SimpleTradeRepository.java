@@ -29,19 +29,27 @@ public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUI
 
     @Override
     public TradeEntity save(TradeEntity entity) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        addSafeParameter(params, "cryptocurrency_symbol", entity.getCryptocurrencySymbol());
-        addSafeParameter(params, "quantity", entity.getQuantity());
-        addSafeParameter(params, "trade_type", entity.getTradeType().name());
-        addSafeParameter(params, "price_per_unit", entity.getPricePerUnit());
-        addSafeParameter(params, "user_id", entity.getUserId());
-        addSafeParameter(params, "fiat_currency", entity.getFiatCurrency());
-        addSafeParameter(params, "profit_loss", entity.getProfitLoss());
+        if (entity.getId() == null) {
+            entity.setId(UUID.randomUUID());
+        }
 
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(getJdbcTemplate())
-                .withTableName(getTableName());
-
-        jdbcInsert.execute(params);
+        String sql = "INSERT INTO trades (id, user_id, trade_type, cryptocurrency_symbol, quantity, price_per_unit, fiat_currency, profit_loss, timestamp) " +
+                    "VALUES (?, ?, ?::trade_type, ?, ?, ?, ?, ?, ?)";
+        
+        getJdbcTemplate().update(sql,
+            entity.getId(),
+            entity.getUserId(),
+            entity.getTradeType().name(),
+            entity.getCryptocurrencySymbol(),
+            entity.getQuantity(),
+            entity.getPricePerUnit(),
+            entity.getFiatCurrency(),
+            entity.getProfitLoss(),
+            entity.getTimestamp() != null ? 
+                java.sql.Timestamp.from(entity.getTimestamp()) : 
+                new java.sql.Timestamp(System.currentTimeMillis())
+        );
+        
         return entity;
     }
 

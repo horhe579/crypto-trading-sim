@@ -34,29 +34,23 @@ public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID>
             throw new BadRequestException("User ID cannot be null");
         }
 
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        addSafeParameter(params, "id", user.getId());
-        addSafeParameter(params, "balance", user.getBalance());
-
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(getJdbcTemplate())
-                .withTableName(getTableName());
-
-        jdbcInsert.execute(params);
-
+        String sql = "INSERT INTO users (id, balance) VALUES (?, ?)";
+        
+        getJdbcTemplate().update(sql,
+            user.getId(),
+            user.getBalance()
+        );
+        
         return user;
     }
 
     @Override
     public UserEntity update(UserEntity entity) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        addSafeParameter(params, "balance", entity.getBalance());
-        addSafeParameter(params, "id", entity.getId());
-
         getJdbcTemplate().update(
-                UPDATE_SQL,
-                params
+            UPDATE_SQL,
+            entity.getBalance(),
+            entity.getId()
         );
-
         return entity;
     }
 

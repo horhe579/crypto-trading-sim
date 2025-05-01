@@ -19,6 +19,7 @@ public final class OrderUtil {
         order.setCurrencyPair(request.currencyPair());
         log.error("Request quantity: {}", request.quantity());
         order.setQuantity(request.quantity());
+        order.setOrderType(request.orderType());
         order.setUserId(userId);
         return order;
     }
