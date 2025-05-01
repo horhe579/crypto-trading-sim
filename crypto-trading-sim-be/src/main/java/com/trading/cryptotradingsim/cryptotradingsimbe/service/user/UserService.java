@@ -17,4 +17,6 @@ public interface UserService {
 
     // TODO: Do I need to rly expose this?
     User deleteUser(UUID userId);
+
+    boolean hasSufficientFunds(UUID userId, double amount);
 }

@@ -6,4 +6,5 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.repository.SimpleReposito
 import java.util.UUID;
 
 public interface UserRepository extends SimpleRepository<UserEntity, UUID> {
+    boolean hasSufficientFunds(UUID userId, double amount);
 }

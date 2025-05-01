@@ -17,6 +17,7 @@ import static com.trading.cryptotradingsim.cryptotradingsimbe.util.RepositoryUti
 public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID> implements UserRepository {
 
     private static final String UPDATE_SQL = "UPDATE users SET balance = ? WHERE id = ?";
+    private static final String CHECK_FUNDS_SQL = "SELECT balance >= ? FROM users WHERE id = ?";
 
     public SimpleUserRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate,
@@ -57,6 +58,17 @@ public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID>
         );
 
         return entity;
+    }
+
+    @Override
+    public boolean hasSufficientFunds(UUID userId, double amount) {
+        Boolean result = getJdbcTemplate().queryForObject(
+                CHECK_FUNDS_SQL,
+                Boolean.class,
+                amount,
+                userId
+        );
+        return result != null && result;
     }
 
     private static RowMapper<UserEntity> createUserRowMapper() {

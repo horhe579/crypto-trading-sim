@@ -6,12 +6,11 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
 
 public class TradeUtil {
     private static final String CURRENCY_PAIR_SEPARATOR = "/";
-    private static final String DEFAULT_FIAT_CURRENCY = "USD";
 
     public static Trade toModel(TradeEntity entity) {
         Trade trade = new Trade();
-        trade.setId(entity.getId());
-        trade.setCurrencyPair(entity.getCryptocurrencySymbol() + CURRENCY_PAIR_SEPARATOR + entity.getFiatCurrency());
+        trade.setFiatCurrency(entity.getFiatCurrency());
+        trade.setCryptocurrencySymbol(entity.getCryptocurrencySymbol());
         trade.setQuantity(entity.getQuantity());
         trade.setOrderType(entity.getTradeType());
         trade.setPricePerUnit(entity.getPricePerUnit());
@@ -22,15 +21,13 @@ public class TradeUtil {
     }
 
     public static TradeEntity toEntity(Trade model) {
-        String[] currencies = model.getCurrencyPair().split(CURRENCY_PAIR_SEPARATOR);
         TradeEntity entity = new TradeEntity();
-        entity.setId(model.getId());
         entity.setUserId(model.getUserId());
         entity.setTradeType(model.getOrderType());
-        entity.setCryptocurrencySymbol(currencies[0]);
+        entity.setCryptocurrencySymbol(model.getCryptocurrencySymbol());
         entity.setQuantity(model.getQuantity());
         entity.setPricePerUnit(model.getPricePerUnit());
-        entity.setFiatCurrency(currencies[1]);
+        entity.setFiatCurrency(model.getFiatCurrency());
         entity.setProfitLoss(model.getProfitLoss());
         entity.setTimestamp(model.getTimestamp());
         return entity;
@@ -50,8 +47,10 @@ public class TradeUtil {
     }
 
     public static Trade toModel(Order order) {
+        String[] currencies = order.getCurrencyPair().split(CURRENCY_PAIR_SEPARATOR);
         Trade trade = new Trade();
-        trade.setCurrencyPair(order.getCurrencyPair());
+        trade.setCryptocurrencySymbol(currencies[0]);
+        trade.setFiatCurrency(currencies[1]);
         trade.setQuantity(order.getQuantity());
         trade.setOrderType(order.getOrderType());
         trade.setPricePerUnit(order.getPricePerUnit());

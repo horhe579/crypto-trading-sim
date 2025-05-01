@@ -3,7 +3,6 @@ package com.trading.cryptotradingsim.cryptotradingsimbe.service.holding;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.HoldingEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Holding;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
-import com.trading.cryptotradingsim.cryptotradingsimbe.exception.NotFoundException;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.holding.HoldingRepository;
 import com.trading.cryptotradingsim.cryptotradingsimbe.util.HoldingUtil;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class SimpleHoldingService implements HoldingService {
 
     @Override
     public Holding createHolding(Trade trade) {
-        return toModel(holdingRepository.save(toEntity(trade)));
+        return toModel(initializeHolding(trade));
     }
 
     // all of the logic is specific to one currency, no conversion is done
@@ -37,10 +36,7 @@ public class SimpleHoldingService implements HoldingService {
         HoldingEntity entity = holdingRepository.findByUserIdAndCryptocurrencySymbol(
                 trade.getUserId(),
                 trade.getCryptocurrencySymbol()
-        ).orElseThrow(() -> new NotFoundException(
-                "Holding not found for user " + trade.getUserId() +
-                        " and cryptocurrency " + trade.getCryptocurrencySymbol()
-        ));
+        ).orElseGet(() -> initializeHolding(trade));
 
         double newQuantity = entity.getQuantity() + trade.getQuantity();
         double newAveragePrice;
@@ -59,12 +55,6 @@ public class SimpleHoldingService implements HoldingService {
         return toModel(holdingRepository.update(entity));
     }
 
-    private double calculateNewAveragePrice(double averagePrice, double currentQuantity, Trade trade) {
-        double newQuantity = currentQuantity + trade.getQuantity();
-        return ((currentQuantity * averagePrice) +
-                (trade.getQuantity() * trade.getPricePerUnit())) / newQuantity;
-    }
-    
     @Override
     public boolean hasHolding(UUID userId, String cryptocurrencySymbol) {
         return holdingRepository.hasHolding(userId, cryptocurrencySymbol);
@@ -81,5 +71,22 @@ public class SimpleHoldingService implements HoldingService {
     public Optional<Holding> getHolding(UUID userId, String cryptocurrencySymbol) {
         return holdingRepository.findByUserIdAndCryptocurrencySymbol(userId, cryptocurrencySymbol)
                 .map(HoldingUtil::toModel);
+    }
+
+    @Override
+    public boolean hasSufficientHolding(UUID userId, String cryptocurrencySymbol, double quantity) {
+        return getHolding(userId, cryptocurrencySymbol)
+                .map(holding -> holding.getQuantity() >= quantity)
+                .orElse(false);
+    }
+
+    private HoldingEntity initializeHolding(Trade trade) {
+        return holdingRepository.save(toEntity(trade));
+    }
+
+    private double calculateNewAveragePrice(double averagePrice, double currentQuantity, Trade trade) {
+        double newQuantity = currentQuantity + trade.getQuantity();
+        return ((currentQuantity * averagePrice) +
+                (trade.getQuantity() * trade.getPricePerUnit())) / newQuantity;
     }
 }

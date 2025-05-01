@@ -17,6 +17,15 @@ public final class HoldingUtil {
         return model;
     }
 
+    public static HoldingEntity toEntity(Holding model) {
+        HoldingEntity entity = new HoldingEntity();
+        entity.setCryptocurrencySymbol(model.getCryptocurrencySymbol());
+        entity.setQuantity(model.getQuantity());
+        entity.setAveragePrice(model.getAveragePrice());
+        entity.setUpdatedAt(model.getUpdatedAt());
+        return entity;
+    }
+
     public static HoldingEntity toEntity(Trade trade) {
         HoldingEntity entity = new HoldingEntity();
         entity.setUserId(trade.getUserId());

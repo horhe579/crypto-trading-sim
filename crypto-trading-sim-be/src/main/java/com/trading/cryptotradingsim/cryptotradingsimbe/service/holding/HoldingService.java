@@ -17,4 +17,6 @@ public interface HoldingService {
     List<Holding> getHoldings(UUID userId);
 
     Optional<Holding> getHolding(UUID userId, String cryptocurrencySymbol);
+
+    boolean hasSufficientHolding(UUID userId, String cryptocurrencySymbol, double quantity);
 } 

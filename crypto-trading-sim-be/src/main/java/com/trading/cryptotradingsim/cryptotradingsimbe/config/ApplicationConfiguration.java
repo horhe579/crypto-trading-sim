@@ -6,9 +6,12 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.repository.trade.TradeRep
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.user.UserRepository;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.coin.CoinDataService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.coin.SimpleCoinPriceServiceService;
+import com.trading.cryptotradingsim.cryptotradingsimbe.service.holding.HoldingService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.holding.SimpleHoldingService;
+import com.trading.cryptotradingsim.cryptotradingsimbe.service.trade.AsynchronousOrderService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.trade.OrderService;
-import com.trading.cryptotradingsim.cryptotradingsimbe.service.trade.SynchronousOrderService;
+import com.trading.cryptotradingsim.cryptotradingsimbe.service.trade.SimpleTradeService;
+import com.trading.cryptotradingsim.cryptotradingsimbe.service.trade.TradeService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.user.SimpleUserService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.user.UserService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.websocket.KrakenWebSocketSubscriber;
@@ -25,11 +28,18 @@ public class ApplicationConfiguration {
     }
 
     @Bean
+    public TradeService tradeService(TradeRepository tradeRepository,
+                                     UserService userService,
+                                     HoldingService holdingService) {
+        return new SimpleTradeService(tradeRepository, userService, holdingService);
+    }
+
+    @Bean
     public OrderService orderService(CoinDataService coinDataService,
                                      UserService userService,
-                                     TradeRepository tradeRepository,
+                                     TradeService tradeService,
                                      HoldingService holdingService) {
-        return new SynchronousOrderService(coinDataService, userService, tradeRepository, holdingService);
+        return new AsynchronousOrderService(coinDataService, userService, holdingService, tradeService);
     }
 
     @Bean

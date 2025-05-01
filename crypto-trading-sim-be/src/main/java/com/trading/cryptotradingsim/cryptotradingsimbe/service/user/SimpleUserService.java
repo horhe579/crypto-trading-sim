@@ -64,6 +64,11 @@ public class SimpleUserService implements UserService {
         return user;
     }
 
+    @Override
+    public boolean hasSufficientFunds(UUID userId, double amount) {
+        return userRepository.hasSufficientFunds(userId, amount);
+    }
+
     private UserEntity createDefaultUser(UUID userId) {
         return new UserEntity(userId, DEFAULT_BALANCE, OffsetDateTime.now());
     }

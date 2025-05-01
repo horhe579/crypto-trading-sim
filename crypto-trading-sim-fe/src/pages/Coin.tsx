@@ -47,7 +47,7 @@ const Coin = () => {
     console.log(currencyPair)
     
     try {
-      const response = await fetch(`${process.env.VITE_BACKEND_SERVICE_URL}/orders/${endpoint}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVICE_URL}/orders/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,8 @@ const Coin = () => {
         },
         body: JSON.stringify({
           currencyPair: currencyPair,
-          amount: amount
+          quantity: amount,
+          orderType: tradeType.toUpperCase()
         })
       })
 
