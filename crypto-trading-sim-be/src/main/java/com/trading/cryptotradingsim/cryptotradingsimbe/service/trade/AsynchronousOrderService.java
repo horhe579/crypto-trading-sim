@@ -28,10 +28,11 @@ public class AsynchronousOrderService implements OrderService {
 
     @Override
     public Order executeBuy(Order buyOrder) {
+        Double currentPrice = coinDataService.getLastPrice(buyOrder.getCurrencyPair());
+
         // Not really getting anything rename to ensureExistsUser
         userService.getOrCreateUser(buyOrder.getUserId());
 
-        Double currentPrice = coinDataService.getLastPrice(buyOrder.getCurrencyPair());
         Instant now = Instant.now();
         buyOrder.setTimestamp(now);
         buyOrder.setPricePerUnit(currentPrice);
@@ -55,10 +56,11 @@ public class AsynchronousOrderService implements OrderService {
 
     @Override
     public Order executeSell(Order sellOrder) {
+        Double currentPrice = coinDataService.getLastPrice(sellOrder.getCurrencyPair());
+
         // Not really getting anything rename to ensureExistsUser
         userService.getOrCreateUser(sellOrder.getUserId());
 
-        Double currentPrice = coinDataService.getLastPrice(sellOrder.getCurrencyPair());
         Instant now = Instant.now();
         sellOrder.setTimestamp(now);
         sellOrder.setPricePerUnit(currentPrice);

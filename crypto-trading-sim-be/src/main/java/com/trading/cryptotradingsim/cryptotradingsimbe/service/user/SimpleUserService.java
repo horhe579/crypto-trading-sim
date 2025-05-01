@@ -39,21 +39,15 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    public User createUser(User user) {
-        return toModel(userRepository.save(toEntity(user)));
-    }
-
-    @Override
     public User updateUser(User user) {
         return toModel(userRepository.update(toEntity(user)));
     }
 
+    // hacky
     @Override
     public User resetUser(UUID userId) {
-        UserEntity userEntity = userRepository.getById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("User with id %s not found", userId)));
-        userEntity.setBalance(DEFAULT_BALANCE);
-        //TODO: Clear trades, holdings
+        userRepository.deleteById(userId);
+        UserEntity userEntity = createDefaultUser(userId);
         return toModel(userRepository.save(userEntity));
     }
 
@@ -69,7 +63,8 @@ public class SimpleUserService implements UserService {
         return userRepository.hasSufficientFunds(userId, amount);
     }
 
-    private UserEntity createDefaultUser(UUID userId) {
-        return new UserEntity(userId, DEFAULT_BALANCE, OffsetDateTime.now());
+    // hacky
+    private UserEntity createDefaultUser(UUID userId, OffsetDateTime... createdAt) {
+        return new UserEntity(userId, DEFAULT_BALANCE, ((createdAt.length > 0) ? createdAt[0] : OffsetDateTime.now()));
     }
 }

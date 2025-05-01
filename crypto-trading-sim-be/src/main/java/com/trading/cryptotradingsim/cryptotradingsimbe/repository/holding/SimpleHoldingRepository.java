@@ -5,7 +5,6 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.repository.SimpleJdbcRepo
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -17,9 +16,11 @@ import static com.trading.cryptotradingsim.cryptotradingsimbe.util.RepositoryUti
 public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity, UUID> implements HoldingRepository {
 
     private static final String UPDATE_SQL = "UPDATE holdings SET quantity = ?, average_price = ?, fiat_currency = ?, updated_at = ? WHERE id = ?";
-    private static final String HAS_HOLDING_SQL = "SELECT COUNT(*) FROM holdings WHERE user_id = ? AND cryptocurrency_symbol = ?";
-    private static final String FIND_BY_USER_AND_SYMBOL_SQL = "SELECT * FROM holdings WHERE user_id = ? AND cryptocurrency_symbol = ?";
-    private static final String FIND_BY_USER_SQL = "SELECT * FROM holdings WHERE user_id = ?";
+    private static final String HAS_HOLDING_SQL = "SELECT COUNT(*) FROM holdings WHERE user_id = ?::uuid AND cryptocurrency_symbol = ?";
+    private static final String FIND_BY_USER_AND_SYMBOL_SQL = "SELECT * FROM holdings WHERE user_id = ?::uuid AND cryptocurrency_symbol = ?";
+    private static final String FIND_BY_USER_SQL = "SELECT * FROM holdings WHERE user_id = ?::uuid";
+    private static final String INSERT_SQL = "INSERT INTO holdings (id, user_id, cryptocurrency_symbol, quantity, average_price, fiat_currency, updated_at) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     public SimpleHoldingRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate,
@@ -36,19 +37,16 @@ public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity,
             entity.setId(UUID.randomUUID());
         }
 
-        String sql = "INSERT INTO holdings (id, user_id, cryptocurrency_symbol, quantity, average_price, fiat_currency, updated_at) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
-        getJdbcTemplate().update(sql,
-            entity.getId(),
-            entity.getUserId(),
-            entity.getCryptocurrencySymbol(),
-            entity.getQuantity(),
-            entity.getAveragePrice(),
-            entity.getFiatCurrency(),
-            entity.getUpdatedAt()
+        getJdbcTemplate().update(INSERT_SQL,
+                entity.getId(),
+                entity.getUserId(),
+                entity.getCryptocurrencySymbol(),
+                entity.getQuantity(),
+                entity.getAveragePrice(),
+                entity.getFiatCurrency(),
+                entity.getUpdatedAt()
         );
-        
+
         return entity;
     }
 
@@ -70,9 +68,8 @@ public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity,
 
     @Override
     public boolean hasHolding(UUID userId, String cryptocurrencySymbol) {
-        String sql = "SELECT COUNT(*) FROM holdings WHERE user_id = ?::uuid AND cryptocurrency_symbol = ?";
         Integer count = getJdbcTemplate().queryForObject(
-                sql,
+                HAS_HOLDING_SQL,
                 Integer.class,
                 userId.toString(),
                 cryptocurrencySymbol

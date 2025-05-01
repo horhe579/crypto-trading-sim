@@ -6,7 +6,6 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.repository.SimpleJdbcRepo
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.util.UUID;
 
@@ -16,7 +15,9 @@ public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUI
 
     private static final String UPDATE_SQL = "UPDATE trades SET cryptocurrency_symbol = ?, quantity = ?, trade_type = ?, " +
             "price_per_unit = ?, user_id = ?, fiat_currency = ?, timestamp = ?, profit_loss = ? " +
-            "WHERE id = ?";
+            "WHERE id = ?::uuid";
+    private static final String INSERT_SQL = "INSERT INTO trades (id, user_id, trade_type, cryptocurrency_symbol, quantity, price_per_unit, fiat_currency, profit_loss, timestamp) " +
+            "VALUES (?, ?, ?::trade_type, ?, ?, ?, ?, ?, ?)";
 
     public SimpleTradeRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate,
@@ -33,23 +34,20 @@ public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUI
             entity.setId(UUID.randomUUID());
         }
 
-        String sql = "INSERT INTO trades (id, user_id, trade_type, cryptocurrency_symbol, quantity, price_per_unit, fiat_currency, profit_loss, timestamp) " +
-                    "VALUES (?, ?, ?::trade_type, ?, ?, ?, ?, ?, ?)";
-        
-        getJdbcTemplate().update(sql,
-            entity.getId(),
-            entity.getUserId(),
-            entity.getTradeType().name(),
-            entity.getCryptocurrencySymbol(),
-            entity.getQuantity(),
-            entity.getPricePerUnit(),
-            entity.getFiatCurrency(),
-            entity.getProfitLoss(),
-            entity.getTimestamp() != null ? 
-                java.sql.Timestamp.from(entity.getTimestamp()) : 
-                new java.sql.Timestamp(System.currentTimeMillis())
+        getJdbcTemplate().update(INSERT_SQL,
+                entity.getId(),
+                entity.getUserId(),
+                entity.getTradeType().name(),
+                entity.getCryptocurrencySymbol(),
+                entity.getQuantity(),
+                entity.getPricePerUnit(),
+                entity.getFiatCurrency(),
+                entity.getProfitLoss(),
+                entity.getTimestamp() != null ?
+                        java.sql.Timestamp.from(entity.getTimestamp()) :
+                        new java.sql.Timestamp(System.currentTimeMillis())
         );
-        
+
         return entity;
     }
 

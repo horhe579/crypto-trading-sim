@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { CryptoTickerContext } from "../contexts/CryptoTickerContext"
 import { MarketCapContext } from "../contexts/MarketCapContext"
@@ -7,6 +7,7 @@ import { CoinData } from "../types/CoinData"
 import { TailSpin } from 'react-loading-icons'
 import AnimatedPrice from "../components/AnimatedPrice"
 import TradeModal from "../components/TradeModal"
+import NotificationManager from "../components/NotificationManager"
 
 const Coin = () => {
   const { coinCode } = useParams()
@@ -17,6 +18,7 @@ const Coin = () => {
   const [coinData, setCoinData] = useState<CoinData | null>(null)
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false)
   const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy')
+  const notificationManagerRef = useRef<{ addNotification: (message: string, type: 'error' | 'success' | 'info' | 'warning', duration?: number) => void }>(null)
 
   useEffect(() => {
     if (!coinCode) {
@@ -44,7 +46,6 @@ const Coin = () => {
 
     const endpoint = tradeType === 'buy' ? 'buy' : 'sell'
     const currencyPair = `${coinData.code.toUpperCase()}/${marketCapContext.currency.name.toUpperCase()}`
-    console.log(currencyPair)
     
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVICE_URL}/orders/${endpoint}`, {
@@ -61,13 +62,21 @@ const Coin = () => {
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to execute ${tradeType} order`)
+        if (response.status === 422) {
+          const errorData = await response.json()
+          notificationManagerRef.current?.addNotification(errorData.message, 'error')
+        } else {
+          throw new Error(`Failed to execute ${tradeType} order`)
+        }
+        return
       }
 
       const result = await response.json()
+      notificationManagerRef.current?.addNotification(`${tradeType.charAt(0).toUpperCase() + tradeType.slice(1)} order executed successfully`, 'success')
       console.log(`${tradeType} order executed:`, result)
     } catch (error) {
       console.error(`Error executing ${tradeType} order:`, error)
+      notificationManagerRef.current?.addNotification(`Error executing ${tradeType} order`, 'error')
     }
   }
 
@@ -78,6 +87,7 @@ const Coin = () => {
 
   return (
     <div className="min-h-screen p-8">
+      <NotificationManager ref={notificationManagerRef} />
       <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate("/")}

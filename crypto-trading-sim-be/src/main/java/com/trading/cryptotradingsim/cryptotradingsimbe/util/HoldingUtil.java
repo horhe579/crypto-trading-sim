@@ -3,10 +3,21 @@ package com.trading.cryptotradingsim.cryptotradingsimbe.util;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.HoldingEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Holding;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
+import com.trading.cryptotradingsim.cryptotradingsimbe.dto.response.HoldingResponse;
 
 import java.time.OffsetDateTime;
 
 public final class HoldingUtil {
+
+    public static HoldingResponse toResponse(Holding holding) {
+        return new HoldingResponse(
+                holding.getCryptocurrencySymbol(),
+                holding.getQuantity(),
+                holding.getAveragePrice(),
+                holding.getFiatCurrency()
+        );
+    }
+
     public static Holding toModel(HoldingEntity entity) {
         Holding model = new Holding();
         model.setUserId(entity.getUserId());

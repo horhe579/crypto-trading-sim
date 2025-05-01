@@ -1,10 +1,12 @@
 package com.trading.cryptotradingsim.cryptotradingsimbe.service.holding;
 
+import com.trading.cryptotradingsim.cryptotradingsimbe.dto.OrderType;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.HoldingEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Holding;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.holding.HoldingRepository;
 import com.trading.cryptotradingsim.cryptotradingsimbe.util.HoldingUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 import static com.trading.cryptotradingsim.cryptotradingsimbe.util.HoldingUtil.toEntity;
 import static com.trading.cryptotradingsim.cryptotradingsimbe.util.HoldingUtil.toModel;
 
+@Slf4j
 @Service
 public class SimpleHoldingService implements HoldingService {
 
@@ -38,14 +41,20 @@ public class SimpleHoldingService implements HoldingService {
                 trade.getCryptocurrencySymbol()
         ).orElseGet(() -> initializeHolding(trade));
 
-        double newQuantity = entity.getQuantity() + trade.getQuantity();
-        double newAveragePrice;
-
-        if (trade.getQuantity() > 0) {
-            newAveragePrice = calculateNewAveragePrice(entity.getAveragePrice(), entity.getQuantity(), trade);
+        double quantityChange;
+        if (trade.getOrderType() == OrderType.BUY) {
+            quantityChange = trade.getQuantity();
+        } else if (trade.getOrderType() == OrderType.SELL) {
+            quantityChange = -trade.getQuantity();
         } else {
-            newAveragePrice = entity.getAveragePrice();
+            throw new IllegalArgumentException("Unsupported order type: " + trade.getOrderType());
         }
+
+        double newQuantity = entity.getQuantity() + quantityChange;
+
+        double newAveragePrice = (trade.getOrderType() == OrderType.BUY) ?
+                calculateNewAveragePrice(entity.getAveragePrice(), entity.getQuantity(), trade) :
+                entity.getAveragePrice();
 
         entity.setQuantity(newQuantity);
         entity.setAveragePrice(newAveragePrice);
@@ -62,6 +71,7 @@ public class SimpleHoldingService implements HoldingService {
 
     @Override
     public List<Holding> getHoldings(UUID userId) {
+        log.info("Getting holdings for user {}", userId);
         return holdingRepository.findByUserId(userId).stream()
                 .map(HoldingUtil::toModel)
                 .collect(Collectors.toList());

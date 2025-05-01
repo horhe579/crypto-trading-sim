@@ -3,27 +3,24 @@ package com.trading.cryptotradingsim.cryptotradingsimbe.repository.user;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.UserEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.exception.BadRequestException;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.SimpleJdbcRepository;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-
-import static com.trading.cryptotradingsim.cryptotradingsimbe.util.RepositoryUtil.addSafeParameter;
 
 public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID> implements UserRepository {
 
     private static final String UPDATE_SQL = "UPDATE users SET balance = ? WHERE id = ?";
     private static final String CHECK_FUNDS_SQL = "SELECT balance >= ? FROM users WHERE id = ?";
+    private static final String INSERT_SQL = "INSERT INTO users (id, balance) VALUES (?, ?)";
+
 
     public SimpleUserRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate,
                 "users",
                 "id",
-                new BeanPropertyRowMapper<>(UserEntity.class),
+                createUserRowMapper(),
                 UserEntity.class,
                 UUID.class);
     }
@@ -34,22 +31,20 @@ public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID>
             throw new BadRequestException("User ID cannot be null");
         }
 
-        String sql = "INSERT INTO users (id, balance) VALUES (?, ?)";
-        
-        getJdbcTemplate().update(sql,
-            user.getId(),
-            user.getBalance()
+        getJdbcTemplate().update(INSERT_SQL,
+                user.getId(),
+                user.getBalance()
         );
-        
+
         return user;
     }
 
     @Override
     public UserEntity update(UserEntity entity) {
         getJdbcTemplate().update(
-            UPDATE_SQL,
-            entity.getBalance(),
-            entity.getId()
+                UPDATE_SQL,
+                entity.getBalance(),
+                entity.getId()
         );
         return entity;
     }
