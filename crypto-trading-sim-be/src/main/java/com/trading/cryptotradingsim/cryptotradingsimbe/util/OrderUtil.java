@@ -12,17 +12,17 @@ public final class OrderUtil {
     public static Order toModel(OrderRequest request, UUID userId) {
         Order order = new Order();
         order.setCurrencyPair(request.currencyPair());
-        order.setAmount(request.amount());
+        order.setQuantity(request.quantity());
         order.setUserId(userId);
         return order;
     }
 
     public static OrderResponse toResponse(Order order) {
         OrderType type = order.getOrderType();
-        Double amount = order.getAmount();
+        Double quantity = order.getQuantity();
         Double pricePerUnit = order.getPricePerUnit();
         String cryptoSymbol = order.getCurrencyPair();
-        String message = String.format("Order of type %s for %s with amount %s at price %s", type, cryptoSymbol, amount, pricePerUnit);
-        return new OrderResponse(pricePerUnit, amount, cryptoSymbol, type, order.getTimestamp());
+        String message = String.format("Order of type %s for %s with quantity %s at price %s", type, cryptoSymbol, quantity, pricePerUnit);
+        return new OrderResponse(pricePerUnit, quantity, cryptoSymbol, type, order.getTimestamp());
     }
 }

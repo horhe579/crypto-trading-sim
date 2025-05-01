@@ -30,10 +30,11 @@ public class SynchronousOrderService implements OrderService {
         validateSufficientFunds(buyOrder);
 
         new Thread(() -> {
+            // simulating delay to see if user receives their receipt faster
             try {
                 Thread.sleep(1000);
                 UUID userId = buyOrder.getUserId();
-                double totalCost = buyOrder.getAmount() * currentPrice;
+                double totalCost = buyOrder.getQuantity() * currentPrice;
 
                 User user = userService.getUser(userId);
                 User updatedUser = new User(
@@ -64,7 +65,7 @@ public class SynchronousOrderService implements OrderService {
             try {
                 Thread.sleep(10000);
                 UUID userId = sellOrder.getUserId();
-                double totalCost = sellOrder.getAmount() * currentPrice;
+                double totalCost = sellOrder.getQuantity() * currentPrice;
 
                 User user = userService.getUser(userId);
                 User updatedUser = new User(
@@ -90,7 +91,7 @@ public class SynchronousOrderService implements OrderService {
     }
 
     private double calculateTotalCost(Order order) {
-        return order.getAmount() * order.getPricePerUnit();
+        return order.getQuantity() * order.getPricePerUnit();
     }
 
     private boolean hasSufficientFunds(UUID userId, double amount) {

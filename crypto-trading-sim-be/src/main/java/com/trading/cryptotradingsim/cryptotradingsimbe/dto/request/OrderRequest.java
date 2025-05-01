@@ -13,7 +13,7 @@ public record OrderRequest(
         String currencyPair,
 
         @NotNull
-        @DecimalMin(value = "0.00000001", message = "Amount must be greater than 0")
-        Double amount
+        @DecimalMin(value = "0.00000001", message = "Quantity must be greater than 0")
+        Double quantity
 ) {
 }

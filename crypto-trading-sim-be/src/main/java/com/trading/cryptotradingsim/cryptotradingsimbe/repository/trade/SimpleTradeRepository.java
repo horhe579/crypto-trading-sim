@@ -8,14 +8,13 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static com.trading.cryptotradingsim.cryptotradingsimbe.util.RepositoryUtil.addSafeParameter;
 
 public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUID> implements TradeRepository {
 
-    private static final String UPDATE_SQL = "UPDATE trades SET cryptocurrency_symbol = ?, amount = ?, trade_type = ?, " +
+    private static final String UPDATE_SQL = "UPDATE trades SET cryptocurrency_symbol = ?, quantity = ?, trade_type = ?, " +
             "price_per_unit = ?, user_id = ?, fiat_currency = ?, timestamp = ?, profit_loss = ? " +
             "WHERE id = ?";
 
@@ -32,7 +31,7 @@ public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUI
     public TradeEntity save(TradeEntity entity) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         addSafeParameter(params, "cryptocurrency_symbol", entity.getCryptocurrencySymbol());
-        addSafeParameter(params, "amount", entity.getAmount());
+        addSafeParameter(params, "quantity", entity.getQuantity());
         addSafeParameter(params, "trade_type", entity.getTradeType().name());
         addSafeParameter(params, "price_per_unit", entity.getPricePerUnit());
         addSafeParameter(params, "user_id", entity.getUserId());
@@ -51,7 +50,7 @@ public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUI
         MapSqlParameterSource params = new MapSqlParameterSource();
 
         addSafeParameter(params, "cryptocurrency_symbol", entity.getCryptocurrencySymbol());
-        addSafeParameter(params, "amount", entity.getAmount());
+        addSafeParameter(params, "quantity", entity.getQuantity());
         addSafeParameter(params, "trade_type", entity.getTradeType().name());
         addSafeParameter(params, "price_per_unit", entity.getPricePerUnit());
         addSafeParameter(params, "fiat_currency", entity.getFiatCurrency());
@@ -72,7 +71,7 @@ public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUI
             trade.setUserId(UUID.fromString(rs.getString("user_id")));
             trade.setTradeType(OrderType.valueOf(rs.getString("trade_type")));
             trade.setCryptocurrencySymbol(rs.getString("cryptocurrency_symbol"));
-            trade.setAmount(rs.getDouble("amount"));
+            trade.setQuantity(rs.getDouble("quantity"));
             trade.setPricePerUnit(rs.getDouble("price_per_unit"));
             trade.setFiatCurrency(rs.getString("fiat_currency"));
             trade.setProfitLoss(rs.getDouble("profit_loss"));

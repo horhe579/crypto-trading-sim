@@ -1,0 +1,30 @@
+package com.trading.cryptotradingsim.cryptotradingsimbe.util;
+
+import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.HoldingEntity;
+import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Holding;
+import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
+
+import java.time.OffsetDateTime;
+
+public final class HoldingUtil {
+    public static Holding toModel(HoldingEntity entity) {
+        Holding model = new Holding();
+        model.setUserId(entity.getUserId());
+        model.setCryptocurrencySymbol(entity.getCryptocurrencySymbol());
+        model.setQuantity(entity.getQuantity());
+        model.setAveragePrice(entity.getAveragePrice());
+        model.setUpdatedAt(entity.getUpdatedAt());
+        return model;
+    }
+
+    public static HoldingEntity toEntity(Trade trade) {
+        HoldingEntity entity = new HoldingEntity();
+        entity.setUserId(trade.getUserId());
+        entity.setCryptocurrencySymbol(trade.getCryptocurrencySymbol());
+        entity.setQuantity(trade.getQuantity());
+        entity.setAveragePrice(trade.getPricePerUnit());
+        entity.setFiatCurrency(trade.getFiatCurrency());
+        entity.setUpdatedAt(OffsetDateTime.now());
+        return entity;
+    }
+}

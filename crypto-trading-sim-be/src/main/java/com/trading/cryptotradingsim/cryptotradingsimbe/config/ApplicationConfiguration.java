@@ -1,9 +1,12 @@
 package com.trading.cryptotradingsim.cryptotradingsimbe.config;
 
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.coin.CoinDataRepository;
+import com.trading.cryptotradingsim.cryptotradingsimbe.repository.holding.HoldingRepository;
+import com.trading.cryptotradingsim.cryptotradingsimbe.repository.trade.TradeRepository;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.user.UserRepository;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.coin.CoinDataService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.coin.SimpleCoinPriceServiceService;
+import com.trading.cryptotradingsim.cryptotradingsimbe.service.holding.SimpleHoldingService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.trade.OrderService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.trade.SynchronousOrderService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.user.SimpleUserService;
@@ -22,13 +25,21 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public OrderService orderService(CoinDataService coinDataService, UserService userService) {
-        return new SynchronousOrderService(coinDataService, userService);
+    public OrderService orderService(CoinDataService coinDataService,
+                                     UserService userService,
+                                     TradeRepository tradeRepository,
+                                     HoldingService holdingService) {
+        return new SynchronousOrderService(coinDataService, userService, tradeRepository, holdingService);
     }
 
     @Bean
     public UserService userService(UserRepository userRepository) {
         return new SimpleUserService(userRepository);
+    }
+
+    @Bean
+    public HoldingService holdingService(HoldingRepository holdingRepository) {
+        return new SimpleHoldingService(holdingRepository);
     }
 
     @Bean

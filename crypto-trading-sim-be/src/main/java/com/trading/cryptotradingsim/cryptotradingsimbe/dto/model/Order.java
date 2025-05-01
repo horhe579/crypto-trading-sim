@@ -14,7 +14,7 @@ import java.util.UUID;
 public class Order {
 
     private String currencyPair;
-    private Double amount;
+    private Double quantity;
     private OrderType orderType;
     private Double pricePerUnit;
     private UUID userId;

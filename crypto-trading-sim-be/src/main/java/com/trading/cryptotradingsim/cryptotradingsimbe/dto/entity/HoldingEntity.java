@@ -1,24 +1,21 @@
 package com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity;
 
-import com.trading.cryptotradingsim.cryptotradingsimbe.dto.OrderType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TradeEntity {
+public class HoldingEntity {
     private UUID id;
     private UUID userId;
-    private OrderType tradeType;
     private String cryptocurrencySymbol;
     private Double quantity;
-    private Double pricePerUnit;
+    private Double averagePrice;
     private String fiatCurrency;
-    private Double profitLoss;
-    private Instant timestamp;
+    private OffsetDateTime updatedAt;
 } 

@@ -13,8 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Trade {
     private UUID id;
-    private String currencyPair;
-    private Double amount;
+    private String cryptocurrencySymbol;
+    private String fiatCurrency;
+    private Double quantity;
     private OrderType orderType;
     private Double pricePerUnit;
     private UUID userId;

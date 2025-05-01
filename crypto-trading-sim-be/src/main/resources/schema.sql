@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS trades
     user_id               UUID           NOT NULL,
     trade_type            trade_type     NOT NULL,
     cryptocurrency_symbol VARCHAR(10)    NOT NULL,
-    amount                DECIMAL(20, 8) NOT NULL,
+    quantity              DECIMAL(20, 8) NOT NULL,
     price_per_unit        DECIMAL(20, 8) NOT NULL,
-    fiat_currency         VARCHAR(4)              DEFAULT 'USD',
+    fiat_currency         VARCHAR(4)     NOT NULL DEFAULT 'USD',
     profit_loss           DECIMAL(20, 8),
     timestamp             TIMESTAMPTZ    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
@@ -24,11 +24,12 @@ CREATE TABLE IF NOT EXISTS trades
 
 CREATE TABLE IF NOT EXISTS holdings
 (
-    id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                    UUID PRIMARY KEY        DEFAULT gen_random_uuid(),
     user_id               UUID           NOT NULL,
     cryptocurrency_symbol VARCHAR(10)    NOT NULL,
     quantity              DECIMAL(20, 8) NOT NULL,
     average_price         DECIMAL(20, 8) NOT NULL,
+    fiat_currency         VARCHAR(4)     NOT NULL DEFAULT 'USD',
     updated_at            TIMESTAMPTZ    NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     UNIQUE (user_id, cryptocurrency_symbol)
