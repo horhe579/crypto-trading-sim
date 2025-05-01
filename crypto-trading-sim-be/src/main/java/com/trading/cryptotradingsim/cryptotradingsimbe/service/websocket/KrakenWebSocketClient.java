@@ -25,6 +25,29 @@ import static com.trading.cryptotradingsim.cryptotradingsimbe.util.TickerMessage
 @Data
 public class KrakenWebSocketClient {
 
+    private static final List<String> TOP_20_COINS = List.of(
+            "BTC/USD",
+            "ETH/USD",
+            "USDT/USD",
+            "XRP/USD",
+            "BNB/USD",
+            "SOL/USD",
+            "USDC/USD",
+            "DOGE/USD",
+            "ADA/USD",
+            "TRX/USD",
+            "STETH/USD",
+            "WBTC/USD",
+            "SUI/USD",
+            "LINK/USD",
+            "AVAX/USD",
+            "XLM/USD",
+            "LEO/USD",
+            "TON/USD",
+            "SHIB/USD",
+            "HBAR/USD"
+    );
+
     // Persist on BE
     private CoinDataService coinDataService;
 
@@ -32,7 +55,7 @@ public class KrakenWebSocketClient {
     public void onOpen(Session session) throws JsonProcessingException {
         log.info("Connected to Kraken websocket");
         // TODO: fetch top 20 prices BE, use them to subscribe to websocket
-        KrakenSubscribeMessage subscribeMessage = new KrakenSubscribeMessage(List.of("BTC/USD", "ETH/USD"));
+        KrakenSubscribeMessage subscribeMessage = new KrakenSubscribeMessage(TOP_20_COINS);
         session.getAsyncRemote().sendText(OBJECT_MAPPER.writeValueAsString(subscribeMessage));
     }
 

@@ -1,4 +1,4 @@
-package com.trading.cryptotradingsim.cryptotradingsimbe.dto.model;
+package com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity;
 
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.OrderType;
 import lombok.AllArgsConstructor;
@@ -11,13 +11,14 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Trade {
+public class TradeEntity {
     private UUID id;
-    private String currencyPair;
-    private Double amount;
-    private OrderType orderType;
-    private Double pricePerUnit;
     private UUID userId;
-    private Instant timestamp;
+    private OrderType tradeType;
+    private String cryptocurrencySymbol;
+    private Double amount;
+    private Double pricePerUnit;
+    private String fiatCurrency;
     private Double profitLoss;
-}
+    private Instant timestamp;
+} 

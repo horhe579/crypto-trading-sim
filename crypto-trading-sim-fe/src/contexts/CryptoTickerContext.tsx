@@ -1,24 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { CryptoTickerContextValue } from "../types/CryptoTickerContextValue"
-import { BaseProviderProps } from "../types/BaseProviderProps"
 import { TickerData } from "../types/TickerData"
 import { MarketCapContext } from "./MarketCapContext"
-
+import { GenericChildrenProps } from "../types/GenericChildrenProps"
 export const CryptoTickerContext = createContext<CryptoTickerContextValue | null>(null)
 
-export const CryptoTickerProvider = ({ children }: BaseProviderProps) => {
+export const CryptoTickerProvider = ({ children }: GenericChildrenProps) => {
     const context = useContext(MarketCapContext);
-
-    const getTradingPairs = (): string[] => {
-        if (context && context.topCoins && context.topCoins.length > 0) {
-            return context.topCoins.map(coin => `${coin.code}/${context.currency.name.toUpperCase()}`);
-        }
-        
-        return [
-            "BTC/USD",
-            "ETH/USD",
-        ];
-    };    
 
     const [ws, setWs] = useState<WebSocket | null>(null)
     const [ticks, setTicks] = useState<Record<string, TickerData>>({})
@@ -72,6 +60,14 @@ export const CryptoTickerProvider = ({ children }: BaseProviderProps) => {
     }
 
     useEffect(() => {
+        if (!context || !context.topCoins || context.topCoins.length === 0) {
+            return;
+        }
+
+        const getTradingPairs = (): string[] => {
+            return context.topCoins.map(coin => `${coin.code}/${context.currency.name.toUpperCase()}`);
+        };
+
         const websocket = new WebSocket("wss://ws.kraken.com/v2")
         setWs(websocket)
 
@@ -89,7 +85,7 @@ export const CryptoTickerProvider = ({ children }: BaseProviderProps) => {
             websocket.close();
         };
 
-    }, [])
+    }, [context?.topCoins, context?.currency])
 
   return (
     <CryptoTickerContext.Provider value={{ ws, ticks }}>

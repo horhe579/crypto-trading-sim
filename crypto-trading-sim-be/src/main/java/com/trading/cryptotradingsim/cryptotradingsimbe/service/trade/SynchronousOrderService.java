@@ -54,7 +54,32 @@ public class SynchronousOrderService implements OrderService {
 
     @Override
     public Order executeSell(Order sellOrder) {
-        return null;
+        // TODO VALIDATE IF USER HAS ENOUGH COINS
+        Double currentPrice = coinDataService.getLastPrice(sellOrder.getCurrencyPair());
+        Instant now = Instant.now();
+        sellOrder.setTimestamp(now);
+        sellOrder.setPricePerUnit(currentPrice);
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(10000);
+                UUID userId = sellOrder.getUserId();
+                double totalCost = sellOrder.getAmount() * currentPrice;
+
+                User user = userService.getUser(userId);
+                User updatedUser = new User(
+                        user.getId(),
+                        user.getBalance() + totalCost,
+                        user.getCreatedAt()
+                );
+                userService.updateUser(updatedUser);
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
+
+        return sellOrder;
     }
 
     private void validateSufficientFunds(Order buyOrder) {

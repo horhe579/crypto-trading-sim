@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react"
-import { BaseProviderProps } from "../types/BaseProviderProps"
+import { GenericChildrenProps } from "../types/GenericChildrenProps"
 import { Currency } from "../types/Currency"
 import { CoinMetadata } from "../types/CoinMetadata"
 import { getErrorMessage } from "../util/Util"
@@ -7,8 +7,7 @@ import { MarketCapContextValue } from "../types/MarketCapContextValue"
 
 export const MarketCapContext = createContext<MarketCapContextValue | null>(null)
 
-export const MarketCapProvider = ({ children }: BaseProviderProps) => {
-
+export const MarketCapProvider = ({ children }: GenericChildrenProps) => {
     const [currency, setCurrency] = useState<Currency>({
         name: "usd",
         symbol: "$"
@@ -26,16 +25,6 @@ export const MarketCapProvider = ({ children }: BaseProviderProps) => {
         };
     }
 
-    const buildQueryParams = (pageLimit?: number):URLSearchParams => {
-        const validPageLimit = pageLimit && pageLimit > 0 ? pageLimit : 20
-
-        const queryParams = new URLSearchParams()
-        queryParams.append("vs_currency", currency.name)
-        queryParams.append("per_page", Math.round(validPageLimit).toString())
-
-        return queryParams
-    }
-
     const handleSuccess = (data: any) => {
         if(Array.isArray(data)){
             console.log(data)
@@ -46,33 +35,29 @@ export const MarketCapProvider = ({ children }: BaseProviderProps) => {
 
     const handleError = (error: any) => {
         const errorMessage = getErrorMessage(error)
-        console.error("API Error:", errorMessage);
+        console.error("Error processing data:", errorMessage);
         setError(errorMessage);
         setIsLoading(false);
     }
     
-    const fetchCoins = (pageLimit?: number) => {
-        const apiKey = import.meta.env.VITE_COINGECKO_API_KEY
-        
+    const loadCoins = () => {
         setIsLoading(true);
         setError(null);
         
-        const options = {
-            method: 'GET',
-            headers: {accept: 'application/json', 'x-cg-api-key': apiKey}
-        }
-          
-        fetch('https://cors-anywhere.herokuapp.com/api.coingecko.com/api/v3/coins/markets?' + buildQueryParams(pageLimit), options)
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                return response.json();
-            })
-            .then(handleSuccess)
-            .catch(handleError)
+        fetch('/src/util/coigecko-topcoins.txt')
+            .then(response => response.text())
+            .then(text => {
+                try {
+                    const coins = JSON.parse(text);
+                    handleSuccess(coins);
+                } catch (error) {
+                    handleError(error);
+                }
+            });
     }
 
     useEffect(() => {
-        fetchCoins()
+        loadCoins();
     }, [currency])
 
     return (

@@ -1,6 +1,6 @@
 package com.trading.cryptotradingsim.cryptotradingsimbe.repository.user;
 
-import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.User;
+import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.UserEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.exception.BadRequestException;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.SimpleJdbcRepository;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -14,20 +14,21 @@ import java.util.UUID;
 
 import static com.trading.cryptotradingsim.cryptotradingsimbe.util.RepositoryUtil.addSafeParameter;
 
+public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID> implements UserRepository {
 
-public class SimpleUserRepository extends SimpleJdbcRepository<User, UUID> implements UserRepository {
+    private static final String UPDATE_SQL = "UPDATE users SET balance = ? WHERE id = ?";
 
     public SimpleUserRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate,
                 "users",
                 "id",
-                new BeanPropertyRowMapper<>(User.class),
-                User.class,
+                new BeanPropertyRowMapper<>(UserEntity.class),
+                UserEntity.class,
                 UUID.class);
     }
 
     @Override
-    public User save(User user) {
+    public UserEntity save(UserEntity user) {
         if (user.getId() == null) {
             throw new BadRequestException("User ID cannot be null");
         }
@@ -35,7 +36,6 @@ public class SimpleUserRepository extends SimpleJdbcRepository<User, UUID> imple
         MapSqlParameterSource params = new MapSqlParameterSource();
         addSafeParameter(params, "id", user.getId());
         addSafeParameter(params, "balance", user.getBalance());
-        addSafeParameter(params, "created_at", user.getCreatedAt());
 
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(getJdbcTemplate())
                 .withTableName(getTableName());
@@ -46,28 +46,25 @@ public class SimpleUserRepository extends SimpleJdbcRepository<User, UUID> imple
     }
 
     @Override
-    public User update(User entity) {
-        // Use explicit SQL types to avoid inference issues
+    public UserEntity update(UserEntity entity) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         addSafeParameter(params, "balance", entity.getBalance());
         addSafeParameter(params, "id", entity.getId());
 
         getJdbcTemplate().update(
-                "UPDATE users SET balance = ? WHERE id = ?",
-                entity.getBalance(),
-                entity.getId()
+                UPDATE_SQL,
+                params
         );
 
         return entity;
     }
 
-    private static RowMapper<User> createUserRowMapper() {
+    private static RowMapper<UserEntity> createUserRowMapper() {
         return (rs, rowNum) -> {
-            User user = new User();
+            UserEntity user = new UserEntity();
             user.setId(UUID.fromString(rs.getString("id")));
             user.setBalance(rs.getDouble("balance"));
 
-            // Safely handle timestamp conversion
             java.sql.Timestamp timestamp = rs.getTimestamp("created_at");
             if (timestamp != null) {
                 user.setCreatedAt(timestamp.toInstant().atOffset(OffsetDateTime.now().getOffset()));
