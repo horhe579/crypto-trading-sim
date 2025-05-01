@@ -8,13 +8,14 @@ import { TailSpin } from 'react-loading-icons'
 import AnimatedPrice from "../components/AnimatedPrice"
 import TradeModal from "../components/TradeModal"
 import NotificationManager from "../components/NotificationManager"
-
+import { OrderContext } from "../contexts/OrderContext"
 const Coin = () => {
   const { coinCode } = useParams()
   const navigate = useNavigate()
   const tickerContext = useContext(CryptoTickerContext)
   const marketCapContext = useContext(MarketCapContext)
   const userContext = useContext(UserContext)
+  const orderContext = useContext(OrderContext)
   const [coinData, setCoinData] = useState<CoinData | null>(null)
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false)
   const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy')
@@ -73,6 +74,7 @@ const Coin = () => {
 
       const result = await response.json()
       notificationManagerRef.current?.addNotification(`${tradeType.charAt(0).toUpperCase() + tradeType.slice(1)} order executed successfully`, 'success')
+      orderContext?.incrementOrderCount()
       console.log(`${tradeType} order executed:`, result)
     } catch (error) {
       console.error(`Error executing ${tradeType} order:`, error)

@@ -8,6 +8,7 @@ import Portfolio from "./pages/Portfolio"
 import Coin from "./pages/Coin"
 import Navbar from "./components/Navbar"
 import PageTransition from "./components/PageTransition"
+import { OrderProvider } from "./contexts/OrderContext"
 
 const AnimatedRoutes = () => {
   const location = useLocation()
@@ -38,16 +39,18 @@ const AnimatedRoutes = () => {
 const App = () => {
   return (
     <Router>
-      <UserProvider>
-        <MarketCapProvider>
-          <CryptoTickerProvider>
-            <div className="bg-gradient-to-b from-indigo-900 to-[#0d064d] min-h-screen w-full">
-              <Navbar />
-              <AnimatedRoutes />
-            </div>
-          </CryptoTickerProvider>
-        </MarketCapProvider>
-      </UserProvider>
+      <OrderProvider>
+        <UserProvider>
+          <MarketCapProvider>
+            <CryptoTickerProvider>
+              <div className="bg-gradient-to-b from-indigo-900 to-[#0d064d] min-h-screen w-full">
+                <Navbar />
+                <AnimatedRoutes />
+              </div>
+            </CryptoTickerProvider>
+          </MarketCapProvider>
+        </UserProvider>
+      </OrderProvider>
     </Router>
   )
 }

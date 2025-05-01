@@ -1,13 +1,5 @@
 import { useState } from 'react'
-
-interface TradeModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (amount: number) => void
-  type: 'buy' | 'sell'
-  coinCode: string
-  currentPrice: number
-}
+import { TradeModalProps } from '../types/TradeModalProps'
 
 const TradeModal = ({ isOpen, onClose, onSubmit, type, coinCode, currentPrice }: TradeModalProps) => {
   const [amount, setAmount] = useState<string>('1')

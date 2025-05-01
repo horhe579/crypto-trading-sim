@@ -1,9 +1,10 @@
 import { createContext, useState, ReactNode } from "react";
 import { OrderContextType } from "../types/OrderContextType";
+import { GenericChildrenProps } from "../types/GenericChildrenProps";
 
 export const OrderContext = createContext<OrderContextType | null>(null);
 
-export const OrderProvider = ({ children }: { children: ReactNode }) => {
+export const OrderProvider = ({ children }: GenericChildrenProps) => {
   const [orderCount, setOrderCount] = useState(0);
 
   const incrementOrderCount = () => {
