@@ -26,7 +26,7 @@ public class InMemoryCoinDataRepository implements CoinDataRepository {
 
         history.addFirst(tickerData);
 
-        log.info("Updated price for {}, current price: {} $", currencyPair, tickerData.last());
+//        log.info("Updated price for {}, current price: {} $", currencyPair, tickerData.last());
         return tickerData;
     }
 

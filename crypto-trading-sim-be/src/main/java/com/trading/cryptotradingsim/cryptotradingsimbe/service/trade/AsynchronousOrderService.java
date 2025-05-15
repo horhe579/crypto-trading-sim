@@ -37,7 +37,7 @@ public class AsynchronousOrderService implements OrderService {
         buyOrder.setTimestamp(now);
         buyOrder.setPricePerUnit(currentPrice);
 
-        log.error("Quantity: {}", buyOrder.getQuantity());
+        log.info("Quantity: {}", buyOrder.getQuantity());
         double totalCost = buyOrder.getQuantity() * currentPrice;
         if (!userService.hasSufficientFunds(buyOrder.getUserId(), totalCost)) {
             throw new InsufficientFundsException("Insufficient funds to execute buy order");

@@ -2,14 +2,9 @@ package com.trading.cryptotradingsim.cryptotradingsimbe.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
-import java.sql.Types;
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,16 +35,5 @@ public class RepositoryUtil {
 
     public static String getAllSql(String tableName) {
         return String.format(GET_ALL_SQL, tableName);
-    }
-
-    public static MapSqlParameterSource addSafeParameter(MapSqlParameterSource source, String parameterName,
-                                                         Object value) {
-        switch (value) {
-            case OffsetDateTime offsetDateTime -> source.addValue(parameterName, value, Types.TIMESTAMP_WITH_TIMEZONE);
-            case Instant instant -> source.addValue(parameterName, value, Types.TIMESTAMP);
-            case UUID uuid -> source.addValue(parameterName, value, Types.OTHER);
-            case null, default -> source.addValue(parameterName, value);
-        }
-        return source;
     }
 }

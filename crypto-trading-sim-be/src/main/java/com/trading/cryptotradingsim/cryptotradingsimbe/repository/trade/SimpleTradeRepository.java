@@ -9,15 +9,32 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import java.util.UUID;
 
-import static com.trading.cryptotradingsim.cryptotradingsimbe.util.RepositoryUtil.addSafeParameter;
-
 public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUID> implements TradeRepository {
 
-    private static final String UPDATE_SQL = "UPDATE trades SET cryptocurrency_symbol = ?, quantity = ?, trade_type = ?, " +
-            "price_per_unit = ?, user_id = ?, fiat_currency = ?, timestamp = ?, profit_loss = ? " +
-            "WHERE id = ?::uuid";
-    private static final String INSERT_SQL = "INSERT INTO trades (id, user_id, trade_type, cryptocurrency_symbol, quantity, price_per_unit, fiat_currency, profit_loss, timestamp) " +
-            "VALUES (?, ?, ?::trade_type, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_SQL =
+            "UPDATE trades " +
+                    "SET cryptocurrency_symbol = ?, " +
+                    "quantity = ?, " +
+                    "trade_type = ?::trade_type, " +
+                    "price_per_unit = ?, " +
+                    "user_id = ?, " +
+                    "fiat_currency = ?, " +
+                    "timestamp = ?::timestamptz, " +
+                    "profit_loss = ? " +
+                    "WHERE id = ?::uuid";
+
+    private static final String INSERT_SQL =
+            "INSERT INTO trades " +
+                    "(id," +
+                    " user_id," +
+                    " trade_type," +
+                    " cryptocurrency_symbol," +
+                    " quantity," +
+                    " price_per_unit," +
+                    " fiat_currency," +
+                    " profit_loss," +
+                    " timestamp) " +
+                    "VALUES (?::uuid, ?, ?::trade_type, ?, ?, ?, ?, ?, ?::timestamptz)";
 
     public SimpleTradeRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate,
@@ -51,21 +68,19 @@ public class SimpleTradeRepository extends SimpleJdbcRepository<TradeEntity, UUI
         return entity;
     }
 
+    // No one would update a trade entry so I might just throw not implemente here
     @Override
     public TradeEntity update(TradeEntity entity) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-
-        addSafeParameter(params, "cryptocurrency_symbol", entity.getCryptocurrencySymbol());
-        addSafeParameter(params, "quantity", entity.getQuantity());
-        addSafeParameter(params, "trade_type", entity.getTradeType().name());
-        addSafeParameter(params, "price_per_unit", entity.getPricePerUnit());
-        addSafeParameter(params, "fiat_currency", entity.getFiatCurrency());
-        addSafeParameter(params, "profit_loss", entity.getProfitLoss());
-        addSafeParameter(params, "id", entity.getId());
-
         getJdbcTemplate().update(
                 UPDATE_SQL,
-                params
+                entity.getCryptocurrencySymbol(),
+                entity.getQuantity(),
+                entity.getTradeType().name(),
+                entity.getPricePerUnit(),
+                entity.getFiatCurrency(),
+                entity.getProfitLoss(),
+                entity.getId()
         );
         return entity;
     }

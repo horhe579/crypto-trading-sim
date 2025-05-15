@@ -11,9 +11,21 @@ import java.util.UUID;
 
 public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID> implements UserRepository {
 
-    private static final String UPDATE_SQL = "UPDATE users SET balance = ? WHERE id = ?";
-    private static final String CHECK_FUNDS_SQL = "SELECT balance >= ? FROM users WHERE id = ?";
-    private static final String INSERT_SQL = "INSERT INTO users (id, balance) VALUES (?, ?)";
+    private static final String UPDATE_SQL =
+            "UPDATE users " +
+                    "SET balance = ? " +
+                    "WHERE id = ?";
+
+    private static final String CHECK_FUNDS_SQL =
+            "SELECT balance >= ? " +
+                    "FROM users " +
+                    "WHERE id = ?";
+
+    private static final String INSERT_SQL =
+            "INSERT INTO users " +
+                    "(id, " +
+                    "balance) " +
+                    "VALUES (?, ?)";
 
 
     public SimpleUserRepository(JdbcTemplate jdbcTemplate) {

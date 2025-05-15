@@ -68,7 +68,7 @@ public class KrakenWebSocketClient {
             TickerMessage tickerMessage = parseTickerMessage(jsonMessage);
             coinDataService.updatePrice(tickerMessage.data().getFirst());
         } catch (JsonProcessingException | IllegalArgumentException e) {
-            log.warn("Could not parse a ws message to a ticker message, reason {}", e.getMessage());
+//            log.warn("Could not parse a ws message to a ticker message, reason {}", e.getMessage());
         }
     }
 }
