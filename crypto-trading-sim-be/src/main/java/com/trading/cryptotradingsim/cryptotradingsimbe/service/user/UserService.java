@@ -7,7 +7,7 @@ import java.util.UUID;
 public interface UserService {
     User getUser(UUID userId);
 
-    User getOrCreateUser(UUID userId);
+    User ensureUserExists(UUID userId);
 
     User updateUser(User user);
 

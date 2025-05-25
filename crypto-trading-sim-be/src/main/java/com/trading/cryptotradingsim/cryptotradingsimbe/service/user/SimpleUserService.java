@@ -29,7 +29,7 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    public User getOrCreateUser(UUID userId) {
+    public User ensureUserExists(UUID userId) {
         return userRepository.getById(userId)
                 .map(UserUtil::toModel)
                 .orElseGet(() -> {

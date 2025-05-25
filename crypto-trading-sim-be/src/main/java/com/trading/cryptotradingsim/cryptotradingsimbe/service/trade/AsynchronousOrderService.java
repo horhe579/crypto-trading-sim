@@ -30,19 +30,9 @@ public class AsynchronousOrderService implements OrderService {
     public Order executeBuy(Order buyOrder) {
         Double currentPrice = coinDataService.getLastPrice(buyOrder.getCurrencyPair());
 
-        // Not really getting anything rename to ensureExistsUser
-        userService.getOrCreateUser(buyOrder.getUserId());
-
-        Instant now = Instant.now();
-        buyOrder.setTimestamp(now);
-        buyOrder.setPricePerUnit(currentPrice);
-
-        log.info("Quantity: {}", buyOrder.getQuantity());
-        double totalCost = buyOrder.getQuantity() * currentPrice;
-        if (!userService.hasSufficientFunds(buyOrder.getUserId(), totalCost)) {
-            throw new InsufficientFundsException("Insufficient funds to execute buy order");
-        }
-
+        prepareOrder(buyOrder, currentPrice);
+        userService.ensureUserExists(buyOrder.getUserId());
+        ensureSufficientFunds(buyOrder, currentPrice);
         tradeService.executeTrade(OrderUtil.toTrade(buyOrder));
 
         return buyOrder;
@@ -50,31 +40,45 @@ public class AsynchronousOrderService implements OrderService {
 
     @Override
     public Order executeSell(Order sellOrder) {
-        Double currentPrice = coinDataService.getLastPrice(sellOrder.getCurrencyPair());
-
         // Not really getting anything rename to ensureExistsUser
         // TODO Race condition when 2 threads reach this in a near same time, they both see user does not exist and try and create one,
         // TODO by the time t2 starts with user creation t1 is finished resulting in a JDBC exception as the user alr exists
-        userService.getOrCreateUser(sellOrder.getUserId());
+        prepareOrder(sellOrder);
+        userService.ensureUserExists(sellOrder.getUserId());
+        ensureSufficientHolding(sellOrder);
+        tradeService.executeTrade(OrderUtil.toTrade(sellOrder));
 
-        Instant now = Instant.now();
-        sellOrder.setTimestamp(now);
-        sellOrder.setPricePerUnit(currentPrice);
+        return sellOrder;
+    }
 
-        String[] currencyPair = sellOrder.getCurrencyPair().split("/");
-        String cryptocurrencySymbol = currencyPair[0];
+    private void ensureSufficientHolding(Order sellOrder) {
+        String cryptocurrencySymbol = extractCryptocurrencySymbol(sellOrder);
         if (!holdingService.hasSufficientHolding(sellOrder.getUserId(), cryptocurrencySymbol, sellOrder.getQuantity())) {
             throw new InsufficientFundsException("Insufficient holdings to execute sell order");
         }
+    }
 
-        new Thread(() -> {
-            try {
-                tradeService.executeTrade(OrderUtil.toTrade(sellOrder));
-            } catch (Exception e) {
-                log.error("Error executing sell trade: {}", e.getMessage(), e);
-            }
-        }).start();
+    private void ensureSufficientFunds(Order buyOrder, Double currentPrice) {
+        double totalCost = buyOrder.getQuantity() * currentPrice;
+        if (!userService.hasSufficientFunds(buyOrder.getUserId(), totalCost)) {
+            throw new InsufficientFundsException("Insufficient funds to execute buy order");
+        }
+    }
 
-        return sellOrder;
+
+    private static String extractCryptocurrencySymbol(Order sellOrder) {
+        String[] currencyPair = sellOrder.getCurrencyPair().split("/");
+        String cryptocurrencySymbol = currencyPair[0];
+        return cryptocurrencySymbol;
+    }
+
+    private void prepareOrder(Order order) {
+        order.setPricePerUnit(coinDataService.getLastPrice(order.getCurrencyPair()));
+        order.setTimestamp(Instant.now());
+    }
+
+    private void prepareOrder(Order order, Double pricePerUnit) {
+        order.setPricePerUnit(pricePerUnit);
+        order.setTimestamp(Instant.now());
     }
 }

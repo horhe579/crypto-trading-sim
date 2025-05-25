@@ -6,7 +6,10 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.service.trade.OrderServic
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
 
@@ -14,7 +17,7 @@ import static com.trading.cryptotradingsim.cryptotradingsimbe.util.OrderUtil.toM
 import static com.trading.cryptotradingsim.cryptotradingsimbe.util.OrderUtil.toResponse;
 
 @Validated
-@RestController
+@RestControllerw
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
