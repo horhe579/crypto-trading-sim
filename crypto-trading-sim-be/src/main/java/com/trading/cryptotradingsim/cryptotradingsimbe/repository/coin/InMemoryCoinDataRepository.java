@@ -18,15 +18,12 @@ public class InMemoryCoinDataRepository implements CoinDataRepository {
 
     @Override
     public TickerData save(TickerData tickerData) {
-
         String currencyPair = tickerData.currencyPair();
-
         Deque<TickerData> history = prices
                 .computeIfAbsent(currencyPair, k -> new LinkedBlockingDeque<>());
 
         history.addFirst(tickerData);
-
-//        log.info("Updated price for {}, current price: {} $", currencyPair, tickerData.last());
+        log.info("Updated price for {}, current price: {} $", currencyPair, tickerData.last());
         return tickerData;
     }
 

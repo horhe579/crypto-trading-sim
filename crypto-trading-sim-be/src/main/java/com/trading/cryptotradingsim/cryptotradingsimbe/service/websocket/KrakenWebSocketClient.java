@@ -11,7 +11,6 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -21,7 +20,6 @@ import static com.trading.cryptotradingsim.cryptotradingsimbe.util.TickerMessage
 
 @Slf4j
 @ClientEndpoint
-@Component
 @Data
 public class KrakenWebSocketClient {
 

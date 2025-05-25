@@ -8,6 +8,7 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.repository.trade.TradeRep
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.holding.HoldingService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.user.UserService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.util.TradeUtil;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.UUID;
 
@@ -23,6 +24,8 @@ public class SimpleTradeService implements TradeService {
         this.holdingService = holdingService;
     }
 
+    // TODO Wrap in a transaction(if called within spring managed context) or send to a MQ
+    @Async
     @Override
     public void executeTrade(Trade trade) {
         UUID userId = trade.getUserId();

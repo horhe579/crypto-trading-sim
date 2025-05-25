@@ -43,13 +43,7 @@ public class AsynchronousOrderService implements OrderService {
             throw new InsufficientFundsException("Insufficient funds to execute buy order");
         }
 
-        new Thread(() -> {
-            try {
-                tradeService.executeTrade(OrderUtil.toTrade(buyOrder));
-            } catch (Exception e) {
-                log.error("Error executing buy trade: {}", e.getMessage(), e);
-            }
-        }).start();
+        tradeService.executeTrade(OrderUtil.toTrade(buyOrder));
 
         return buyOrder;
     }
@@ -59,6 +53,8 @@ public class AsynchronousOrderService implements OrderService {
         Double currentPrice = coinDataService.getLastPrice(sellOrder.getCurrencyPair());
 
         // Not really getting anything rename to ensureExistsUser
+        // TODO Race condition when 2 threads reach this in a near same time, they both see user does not exist and try and create one,
+        // TODO by the time t2 starts with user creation t1 is finished resulting in a JDBC exception as the user alr exists
         userService.getOrCreateUser(sellOrder.getUserId());
 
         Instant now = Instant.now();

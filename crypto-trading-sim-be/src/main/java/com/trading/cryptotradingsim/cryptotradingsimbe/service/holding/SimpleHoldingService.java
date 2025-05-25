@@ -34,7 +34,7 @@ public class SimpleHoldingService implements HoldingService {
     }
 
     // all of the logic is specific to one currency, no conversion is done
-    // TODO fix this
+    // TODO fix this - race condition
     @Override
     public Holding updateHolding(Trade trade) {
         HoldingEntity entity = holdingRepository.findByUserIdAndCryptocurrencySymbol(
