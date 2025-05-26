@@ -4,5 +4,6 @@ import java.util.List;
 
 public record TickerMessage(String channel,
                             String type,
-                            List<TickerData> data) {
+                            List<TickerData> data
+) {
 }

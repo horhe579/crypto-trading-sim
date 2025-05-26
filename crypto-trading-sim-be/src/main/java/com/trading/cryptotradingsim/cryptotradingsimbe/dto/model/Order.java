@@ -12,7 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Order {
-
     private String currencyPair;
     private Double quantity;
     private OrderType orderType;

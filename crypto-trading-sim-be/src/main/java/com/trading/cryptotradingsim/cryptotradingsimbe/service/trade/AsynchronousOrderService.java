@@ -40,7 +40,6 @@ public class AsynchronousOrderService implements OrderService {
 
     @Override
     public Order executeSell(Order sellOrder) {
-        // Not really getting anything rename to ensureExistsUser
         // TODO Race condition when 2 threads reach this in a near same time, they both see user does not exist and try and create one,
         // TODO by the time t2 starts with user creation t1 is finished resulting in a JDBC exception as the user alr exists
         prepareOrder(sellOrder);
@@ -68,8 +67,7 @@ public class AsynchronousOrderService implements OrderService {
 
     private static String extractCryptocurrencySymbol(Order sellOrder) {
         String[] currencyPair = sellOrder.getCurrencyPair().split("/");
-        String cryptocurrencySymbol = currencyPair[0];
-        return cryptocurrencySymbol;
+        return currencyPair[0];
     }
 
     private void prepareOrder(Order order) {

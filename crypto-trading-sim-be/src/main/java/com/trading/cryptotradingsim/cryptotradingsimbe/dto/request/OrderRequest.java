@@ -6,7 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public record OrderRequest(
-        @NotNull OrderType orderType,
+        @NotNull
+        OrderType orderType,
 
         @NotNull
         @Pattern(regexp = "^[A-Z]{3,5}/USD$", message = "currencyPair must be in the format XXX/USD or XXXX/USD")

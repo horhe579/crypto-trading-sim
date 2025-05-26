@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 
 @Configuration
 public class JdbcConfiguration {
+
     @Bean
     public DataSource dataSource(@Value("${spring.datasource.driver-class-name}") String driverClassName,
                                  @Value("${spring.datasource.url}") String url,
