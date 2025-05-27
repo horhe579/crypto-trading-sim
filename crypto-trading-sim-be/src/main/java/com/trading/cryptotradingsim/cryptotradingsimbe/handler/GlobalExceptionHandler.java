@@ -2,10 +2,7 @@ package com.trading.cryptotradingsim.cryptotradingsimbe.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.APIError;
-import com.trading.cryptotradingsim.cryptotradingsimbe.exception.BadRequestException;
-import com.trading.cryptotradingsim.cryptotradingsimbe.exception.InsufficientFundsException;
-import com.trading.cryptotradingsim.cryptotradingsimbe.exception.NotFoundException;
-import com.trading.cryptotradingsim.cryptotradingsimbe.exception.NotImplementedException;
+import com.trading.cryptotradingsim.cryptotradingsimbe.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,6 +16,11 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(InvalidPriceException.class)
+    public ResponseEntity<APIError> handleInvalidPriceException(InvalidPriceException e) {
+        return handleExceptionInternal(e, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<APIError> handleNoResourceFoundException(NoResourceFoundException e) {

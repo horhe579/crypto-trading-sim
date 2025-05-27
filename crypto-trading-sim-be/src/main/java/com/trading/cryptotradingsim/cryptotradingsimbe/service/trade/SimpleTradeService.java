@@ -1,6 +1,5 @@
 package com.trading.cryptotradingsim.cryptotradingsimbe.service.trade;
 
-import com.trading.cryptotradingsim.cryptotradingsimbe.dto.OrderType;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.TradeEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.User;
@@ -9,8 +8,6 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.service.holding.HoldingSe
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.user.UserService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.util.TradeUtil;
 import org.springframework.scheduling.annotation.Async;
-
-import java.util.UUID;
 
 public class SimpleTradeService implements TradeService {
 
@@ -28,35 +25,37 @@ public class SimpleTradeService implements TradeService {
     @Async
     @Override
     public void executeTrade(Trade trade) {
-        UUID userId = trade.getUserId();
-        Double totalCost = trade.getQuantity() * trade.getPricePerUnit();
-        User user = userService.getUser(userId);
+        saveTrade(trade);
+        updateUserBalance(
+                trade,
+                userService.getUser(trade.getUserId()),
+                trade.getQuantity() * trade.getPricePerUnit());
+        updateHolding(trade);
+    }
 
+    private void updateHolding(Trade trade) {
+        switch (trade.getOrderType()) {
+            case BUY, SELL -> holdingService.updateHolding(trade);
+            default -> throw new IllegalArgumentException("Invalid Order Type.");
+        }
+    }
+
+    private void updateUserBalance(Trade trade, User user, Double totalCost) {
+        double newBalance = switch (trade.getOrderType()) {
+            case BUY -> user.getBalance() - totalCost;
+            case SELL -> user.getBalance() + totalCost;
+            case null -> throw new IllegalArgumentException("Invalid Order Type.");
+        };
+
+        userService.updateUser(new User(
+                user.getId(),
+                newBalance,
+                user.getCreatedAt()
+        ));
+    }
+
+    private void saveTrade(Trade trade) {
         TradeEntity tradeEntity = TradeUtil.toEntity(trade);
         tradeRepository.save(tradeEntity);
-
-        if (trade.getOrderType() == OrderType.BUY) {
-            userService.updateUser(new User(
-                    user.getId(),
-                    user.getBalance() - totalCost,
-                    user.getCreatedAt()
-            ));
-        } else {
-            userService.updateUser(new User(
-                    user.getId(),
-                    user.getBalance() + totalCost,
-                    user.getCreatedAt()
-            ));
-        }
-
-        if (trade.getOrderType() == OrderType.BUY) {
-            if (holdingService.hasHolding(userId, trade.getCryptocurrencySymbol())) {
-                holdingService.updateHolding(trade);
-            } else {
-                holdingService.createHolding(trade);
-            }
-        } else {
-            holdingService.updateHolding(trade);
-        }
     }
 }

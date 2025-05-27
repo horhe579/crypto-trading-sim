@@ -52,7 +52,6 @@ public class KrakenWebSocketClient {
     @OnOpen
     public void onOpen(Session session) throws JsonProcessingException {
         log.info("Connected to Kraken websocket");
-        // TODO: fetch top 20 prices BE, use them to subscribe to websocket
         KrakenSubscribeMessage subscribeMessage = new KrakenSubscribeMessage(TOP_20_COINS);
         session.getAsyncRemote().sendText(OBJECT_MAPPER.writeValueAsString(subscribeMessage));
     }

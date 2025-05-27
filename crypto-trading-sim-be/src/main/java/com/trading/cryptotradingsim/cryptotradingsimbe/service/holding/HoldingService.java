@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface HoldingService {
+
     Holding createHolding(Trade trade);
 
     Holding updateHolding(Trade trade);

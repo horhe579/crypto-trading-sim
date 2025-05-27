@@ -32,10 +32,12 @@ public class SimpleUserService implements UserService {
     public User ensureUserExists(UUID userId) {
         return userRepository.getById(userId)
                 .map(UserUtil::toModel)
-                .orElseGet(() -> {
-                    UserEntity defaultUser = createDefaultUser(userId);
-                    return toModel(userRepository.save(defaultUser));
-                });
+                .orElseGet(() -> saveDefaultUser(userId));
+    }
+
+    private User saveDefaultUser(UUID userId) {
+        UserEntity defaultUser = createDefaultUser(userId);
+        return toModel(userRepository.save(defaultUser));
     }
 
     @Override
@@ -47,8 +49,7 @@ public class SimpleUserService implements UserService {
     @Override
     public User resetUser(UUID userId) {
         userRepository.deleteById(userId);
-        UserEntity userEntity = createDefaultUser(userId);
-        return toModel(userRepository.save(userEntity));
+        return saveDefaultUser(userId);
     }
 
     @Override
