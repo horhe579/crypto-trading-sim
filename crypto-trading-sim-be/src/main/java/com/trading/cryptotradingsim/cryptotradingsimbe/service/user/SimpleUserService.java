@@ -5,6 +5,7 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.User;
 import com.trading.cryptotradingsim.cryptotradingsimbe.exception.NotFoundException;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.user.UserRepository;
 import com.trading.cryptotradingsim.cryptotradingsimbe.util.UserUtil;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -30,9 +31,13 @@ public class SimpleUserService implements UserService {
 
     @Override
     public User ensureUserExists(UUID userId) {
-        return userRepository.getById(userId)
-                .map(UserUtil::toModel)
-                .orElseGet(() -> saveDefaultUser(userId));
+        try {
+            return saveDefaultUser(userId);
+        } catch (DataIntegrityViolationException e) {
+            return userRepository.getById(userId)
+                    .map(UserUtil::toModel)
+                    .orElseThrow(() -> new RuntimeException("User should exist but wasn't found"));
+        }
     }
 
     private User saveDefaultUser(UUID userId) {

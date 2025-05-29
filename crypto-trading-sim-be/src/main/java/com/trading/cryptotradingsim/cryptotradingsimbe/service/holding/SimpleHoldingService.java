@@ -29,7 +29,7 @@ public class SimpleHoldingService implements HoldingService {
     public Holding createHolding(Trade trade) {
         return toModel(initializeHolding(trade));
     }
-    
+
     // all of the logic is specific to one currency, no conversion is done
     // TODO fix this - race condition
     @Override

@@ -36,10 +36,8 @@ public class ApplicationConfiguration {
 
     @Bean
     public OrderService orderService(CoinDataService coinDataService,
-                                     UserService userService,
-                                     TradeService tradeService,
-                                     HoldingService holdingService) {
-        return new AsynchronousOrderService(coinDataService, userService, holdingService, tradeService);
+                                     TradeService tradeService) {
+        return new AsynchronousOrderService(coinDataService, tradeService);
     }
 
     @Bean

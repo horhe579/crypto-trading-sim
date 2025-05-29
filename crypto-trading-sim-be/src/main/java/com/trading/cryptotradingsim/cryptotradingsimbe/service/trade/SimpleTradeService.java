@@ -3,11 +3,14 @@ package com.trading.cryptotradingsim.cryptotradingsimbe.service.trade;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.TradeEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.User;
+import com.trading.cryptotradingsim.cryptotradingsimbe.exception.InsufficientFundsException;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.trade.TradeRepository;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.holding.HoldingService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.service.user.UserService;
 import com.trading.cryptotradingsim.cryptotradingsimbe.util.TradeUtil;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 public class SimpleTradeService implements TradeService {
 
@@ -21,16 +24,30 @@ public class SimpleTradeService implements TradeService {
         this.holdingService = holdingService;
     }
 
-    // TODO Wrap in a transaction(if called within spring managed context) or send to a MQ
     @Async
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Override
     public void executeTrade(Trade trade) {
+        double totalCost = trade.getQuantity() * trade.getPricePerUnit();
+        User user = userService.ensureUserExists(trade.getUserId());
+        ensureSufficientFunds(user, totalCost);
+        ensureSufficientHolding(trade);
         saveTrade(trade);
-        updateUserBalance(
-                trade,
-                userService.getUser(trade.getUserId()),
-                trade.getQuantity() * trade.getPricePerUnit());
+        updateUserBalance(trade, user, totalCost);
         updateHolding(trade);
+    }
+
+    private void ensureSufficientFunds(User user, double totalCost) {
+        if (!userService.hasSufficientFunds(user.getId(), totalCost)) {
+            throw new InsufficientFundsException("Insufficient funds to execute buy order");
+        }
+    }
+
+    private void ensureSufficientHolding(Trade trade) {
+        String cryptocurrencySymbol = trade.getCryptocurrencySymbol();
+        if (!holdingService.hasSufficientHolding(trade.getUserId(), cryptocurrencySymbol, trade.getQuantity())) {
+            throw new InsufficientFundsException("Insufficient holdings to execute sell order");
+        }
     }
 
     private void updateHolding(Trade trade) {
