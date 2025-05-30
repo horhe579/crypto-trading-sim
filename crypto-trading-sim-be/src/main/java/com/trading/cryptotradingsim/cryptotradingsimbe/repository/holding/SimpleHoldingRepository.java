@@ -135,8 +135,11 @@ public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity,
                 holding.getUpdatedAt()
         );
         if (rowsAffected == 0) {
-            return getById(holding.getId()).orElseThrow(
-                    () -> new RuntimeException("Holding should exist but wasn't found after save"));
+            var kur = findByUserIdAndCryptocurrencySymbol(holding.getUserId(), holding.getCryptocurrencySymbol());
+            if (kur.isEmpty()) throw new RuntimeException("Holding should exist but wasn't found");
+            return kur.get();
+//            return getById(holding.getId()).orElseThrow(
+//                    () -> new RuntimeException("Holding should exist but wasn't found after save"));
         }
         return holding;
     }
