@@ -1,0 +1,65 @@
+### Buy Order Request 1
+POST http://localhost:5911/api/v1/orders/buy
+Content-Type: application/json
+X-User-Id: 40aa0023-0e43-4f9c-a403-ecde737ad8e4
+
+{
+  "currencyPair": "BTC/USD",
+  "quantity": 0.09,
+  "orderType": "BUY"
+}
+
+### Buy Order Request 2
+POST http://localhost:5911/api/v1/orders/buy
+Content-Type: application/json
+X-User-Id: 40aa0023-0e43-4f9c-a403-ecde737ad8e4
+
+{
+  "currencyPair": "BTC/USD",
+  "quantity": 0.09,
+  "orderType": "BUY"
+}
+
+### Buy Order Request 3
+POST http://localhost:5911/api/v1/orders/buy
+Content-Type: application/json
+X-User-Id: 40aa0023-0e43-4f9c-a403-ecde737ad8e4
+
+{
+  "currencyPair": "BTC/USD",
+  "quantity": 0.09,
+  "orderType": "BUY"
+}
+
+### Buy Order Request 4
+POST http://localhost:5911/api/v1/orders/buy
+Content-Type: application/json
+X-User-Id: 40aa0023-0e43-4f9c-a403-ecde737ad8e4
+
+{
+  "currencyPair": "BTC/USD",
+  "quantity": 0.09,
+  "orderType": "BUY"
+}
+
+### Buy Order Request 5
+POST http://localhost:5911/api/v1/orders/buy
+Content-Type: application/json
+X-User-Id: 40aa0023-0e43-4f9c-a403-ecde737ad8e4
+
+{
+  "currencyPair": "BTC/USD",
+  "quantity": 0.09,
+  "orderType": "BUY"
+}
+
+### Buy Order Request 6
+POST http://localhost:5911/api/v1/orders/buy
+Content-Type: application/json
+X-User-Id: 40aa0023-0e43-4f9c-a403-ecde737ad8e4
+
+{
+  "currencyPair": "BTC/USD",
+  "quantity": 0.09,
+  "orderType": "BUY"
+}

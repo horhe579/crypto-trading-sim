@@ -23,7 +23,7 @@ public class InMemoryCoinDataRepository implements CoinDataRepository {
                 .computeIfAbsent(currencyPair, k -> new LinkedBlockingDeque<>());
 
         history.addFirst(tickerData);
-        log.info("Updated price for {}, current price: {} $", currencyPair, tickerData.last());
+//        log.info("Updated price for {}, current price: {} $", currencyPair, tickerData.last());
         return tickerData;
     }
 

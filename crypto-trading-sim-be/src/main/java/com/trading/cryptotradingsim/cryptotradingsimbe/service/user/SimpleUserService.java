@@ -5,7 +5,6 @@ import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.User;
 import com.trading.cryptotradingsim.cryptotradingsimbe.exception.NotFoundException;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.user.UserRepository;
 import com.trading.cryptotradingsim.cryptotradingsimbe.util.UserUtil;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -31,18 +30,12 @@ public class SimpleUserService implements UserService {
 
     @Override
     public User ensureUserExists(UUID userId) {
-        try {
-            return saveDefaultUser(userId);
-        } catch (DataIntegrityViolationException e) {
-            return userRepository.getById(userId)
-                    .map(UserUtil::toModel)
-                    .orElseThrow(() -> new RuntimeException("User should exist but wasn't found"));
-        }
+        return saveDefaultUser(userId);
     }
 
     private User saveDefaultUser(UUID userId) {
         UserEntity defaultUser = createDefaultUser(userId);
-        return toModel(userRepository.save(defaultUser));
+        return toModel(userRepository.saveIfAbsent(defaultUser));
     }
 
     @Override
@@ -54,7 +47,9 @@ public class SimpleUserService implements UserService {
     @Override
     public User resetUser(UUID userId) {
         userRepository.deleteById(userId);
-        return saveDefaultUser(userId);
+        saveDefaultUser(userId);
+        return toModel(userRepository.getById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User should exist but wasn't found after reset")));
     }
 
     @Override

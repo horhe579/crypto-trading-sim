@@ -20,6 +20,7 @@ public final class HoldingUtil {
 
     public static Holding toModel(HoldingEntity entity) {
         Holding model = new Holding();
+        model.setId(entity.getId());
         model.setUserId(entity.getUserId());
         model.setCryptocurrencySymbol(entity.getCryptocurrencySymbol());
         model.setQuantity(entity.getQuantity());
@@ -30,18 +31,21 @@ public final class HoldingUtil {
 
     public static HoldingEntity toEntity(Holding model) {
         HoldingEntity entity = new HoldingEntity();
+        entity.setId(model.getId());
+        entity.setUserId(model.getUserId());
         entity.setCryptocurrencySymbol(model.getCryptocurrencySymbol());
+        entity.setFiatCurrency(model.getFiatCurrency());
         entity.setQuantity(model.getQuantity());
         entity.setAveragePrice(model.getAveragePrice());
         entity.setUpdatedAt(model.getUpdatedAt());
         return entity;
     }
 
-    public static HoldingEntity toEntity(Trade trade) {
+    public static HoldingEntity toEntity(Trade trade, double... quantity) {
         HoldingEntity entity = new HoldingEntity();
         entity.setUserId(trade.getUserId());
         entity.setCryptocurrencySymbol(trade.getCryptocurrencySymbol());
-        entity.setQuantity(trade.getQuantity());
+        entity.setQuantity((quantity.length > 0) ? quantity[0] : trade.getQuantity());
         entity.setAveragePrice(trade.getPricePerUnit());
         entity.setFiatCurrency(trade.getFiatCurrency());
         entity.setUpdatedAt(OffsetDateTime.now());

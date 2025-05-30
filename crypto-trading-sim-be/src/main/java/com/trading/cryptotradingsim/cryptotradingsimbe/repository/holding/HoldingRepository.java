@@ -8,10 +8,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface HoldingRepository extends SimpleRepository<HoldingEntity, UUID> {
+    HoldingEntity saveIfAbsent(HoldingEntity holding);
 
     boolean hasHolding(UUID userId, String cryptocurrencySymbol);
-    
+
     Optional<HoldingEntity> findByUserIdAndCryptocurrencySymbol(UUID userId, String cryptocurrencySymbol);
-    
+
     List<HoldingEntity> findByUserId(UUID userId);
 } 

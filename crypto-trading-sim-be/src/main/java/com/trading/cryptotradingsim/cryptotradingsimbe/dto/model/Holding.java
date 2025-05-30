@@ -11,6 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Holding {
+    private UUID id;
     private UUID userId;
     private String cryptocurrencySymbol;
     private Double quantity;

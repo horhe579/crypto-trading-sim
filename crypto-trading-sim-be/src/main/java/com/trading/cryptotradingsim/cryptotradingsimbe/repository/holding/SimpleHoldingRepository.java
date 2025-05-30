@@ -45,6 +45,18 @@ public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity,
                     "updated_at) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
+    private static final String INSERT_IF_ABSENT_SQL =
+            "INSERT INTO holdings " +
+                    "(id, " +
+                    "user_id, " +
+                    "cryptocurrency_symbol, " +
+                    "quantity, " +
+                    "average_price, " +
+                    "fiat_currency, " +
+                    "updated_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                    "ON CONFLICT (user_id, cryptocurrency_symbol) DO NOTHING";
+
     public SimpleHoldingRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate,
                 "holdings",
@@ -56,21 +68,12 @@ public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity,
 
     @Override
     public HoldingEntity save(HoldingEntity entity) {
-        if (entity.getId() == null) {
-            entity.setId(UUID.randomUUID());
-        }
+        return saveHolding(entity, INSERT_SQL);
+    }
 
-        getJdbcTemplate().update(INSERT_SQL,
-                entity.getId(),
-                entity.getUserId(),
-                entity.getCryptocurrencySymbol(),
-                entity.getQuantity(),
-                entity.getAveragePrice(),
-                entity.getFiatCurrency(),
-                entity.getUpdatedAt()
-        );
-
-        return entity;
+    @Override
+    public HoldingEntity saveIfAbsent(HoldingEntity holding) {
+        return saveHolding(holding, INSERT_IF_ABSENT_SQL);
     }
 
     @Override
@@ -115,6 +118,27 @@ public class SimpleHoldingRepository extends SimpleJdbcRepository<HoldingEntity,
                 createHoldingRowMapper(),
                 userId.toString()
         );
+    }
+
+    private HoldingEntity saveHolding(HoldingEntity holding, String insertSql) {
+        if (holding.getId() == null) {
+            holding.setId(UUID.randomUUID());
+        }
+
+        int rowsAffected = getJdbcTemplate().update(insertSql,
+                holding.getId(),
+                holding.getUserId(),
+                holding.getCryptocurrencySymbol(),
+                holding.getQuantity(),
+                holding.getAveragePrice(),
+                holding.getFiatCurrency(),
+                holding.getUpdatedAt()
+        );
+        if (rowsAffected == 0) {
+            return getById(holding.getId()).orElseThrow(
+                    () -> new RuntimeException("Holding should exist but wasn't found after save"));
+        }
+        return holding;
     }
 
     private static RowMapper<HoldingEntity> createHoldingRowMapper() {

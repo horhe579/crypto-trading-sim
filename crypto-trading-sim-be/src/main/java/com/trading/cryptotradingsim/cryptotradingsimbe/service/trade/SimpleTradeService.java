@@ -1,5 +1,6 @@
 package com.trading.cryptotradingsim.cryptotradingsimbe.service.trade;
 
+import com.trading.cryptotradingsim.cryptotradingsimbe.dto.OrderType;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.TradeEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.User;
@@ -24,14 +25,16 @@ public class SimpleTradeService implements TradeService {
         this.holdingService = holdingService;
     }
 
+
+    // TODO: Logs, Error and success Handling with notifications
     @Async
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
     public void executeTrade(Trade trade) {
         double totalCost = trade.getQuantity() * trade.getPricePerUnit();
         User user = userService.ensureUserExists(trade.getUserId());
         ensureSufficientFunds(user, totalCost);
-        ensureSufficientHolding(trade);
+        if (trade.getOrderType() == OrderType.SELL) ensureSufficientHolding(trade);
         saveTrade(trade);
         updateUserBalance(trade, user, totalCost);
         updateHolding(trade);

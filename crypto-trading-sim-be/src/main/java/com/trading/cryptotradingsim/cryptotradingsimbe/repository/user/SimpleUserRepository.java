@@ -27,6 +27,13 @@ public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID>
                     "balance) " +
                     "VALUES (?, ?)";
 
+    private static final String INSERT_IF_ABSENT_SQL =
+            "INSERT INTO users " +
+                    "(id, " +
+                    "balance) " +
+                    "VALUES (?, ?) " +
+                    "ON CONFLICT (id) DO NOTHING";
+
 
     public SimpleUserRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate,
@@ -39,16 +46,12 @@ public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID>
 
     @Override
     public UserEntity save(UserEntity user) {
-        if (user.getId() == null) {
-            throw new BadRequestException("User ID cannot be null");
-        }
+        return saveUser(user, INSERT_SQL);
+    }
 
-        getJdbcTemplate().update(INSERT_SQL,
-                user.getId(),
-                user.getBalance()
-        );
-
-        return user;
+    @Override
+    public UserEntity saveIfAbsent(UserEntity user) {
+        return saveUser(user, INSERT_IF_ABSENT_SQL);
     }
 
     @Override
@@ -70,6 +73,22 @@ public class SimpleUserRepository extends SimpleJdbcRepository<UserEntity, UUID>
                 userId
         );
         return result != null && result;
+    }
+
+    private UserEntity saveUser(UserEntity user, String insertSql) {
+        if (user.getId() == null) {
+            throw new BadRequestException("User ID cannot be null");
+        }
+
+        int rowsAffected = getJdbcTemplate().update(insertSql,
+                user.getId(),
+                user.getBalance()
+        );
+        if (rowsAffected == 0) {
+            return getById(user.getId()).orElseThrow(
+                    () -> new RuntimeException("User should exist but wasn't found after save"));
+        }
+        return user;
     }
 
     private static RowMapper<UserEntity> createUserRowMapper() {

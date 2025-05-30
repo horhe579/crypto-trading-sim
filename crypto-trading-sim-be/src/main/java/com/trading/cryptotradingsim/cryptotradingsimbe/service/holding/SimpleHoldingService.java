@@ -1,6 +1,5 @@
 package com.trading.cryptotradingsim.cryptotradingsimbe.service.holding;
 
-import com.trading.cryptotradingsim.cryptotradingsimbe.dto.entity.HoldingEntity;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Holding;
 import com.trading.cryptotradingsim.cryptotradingsimbe.dto.model.Trade;
 import com.trading.cryptotradingsim.cryptotradingsimbe.repository.holding.HoldingRepository;
@@ -27,25 +26,24 @@ public class SimpleHoldingService implements HoldingService {
 
     @Override
     public Holding createHolding(Trade trade) {
-        return toModel(initializeHolding(trade));
+        return initializeHolding(trade);
     }
 
-    // all of the logic is specific to one currency, no conversion is done
-    // TODO fix this - race condition
     @Override
     public Holding updateHolding(Trade trade) {
-        HoldingEntity entity = getOrCreateHolding(trade);
+        Holding holding = getOrCreateHolding(trade);
 
         double quantityChange = getQuantityChange(trade);
-        double newQuantity = calculateNewQuantity(entity, quantityChange);
-        double newAveragePrice = calculateNewAveragePrice(entity.getAveragePrice(), entity.getQuantity(), trade);
+        double newQuantity = calculateNewQuantity(holding, quantityChange);
+        double newAveragePrice = calculateNewAveragePrice(holding.getAveragePrice(), holding.getQuantity(), trade);
 
-        entity.setQuantity(newQuantity);
-        entity.setAveragePrice(newAveragePrice);
-        entity.setFiatCurrency(trade.getFiatCurrency());
-        entity.setUpdatedAt(OffsetDateTime.now());
+        holding.setQuantity(newQuantity);
+        holding.setAveragePrice(newAveragePrice);
+        holding.setFiatCurrency(trade.getFiatCurrency());
+        holding.setUpdatedAt(OffsetDateTime.now());
 
-        return toModel(holdingRepository.update(entity));
+        var kur = toModel(holdingRepository.update(toEntity(holding)));
+        return kur;
     }
 
     @Override
@@ -74,15 +72,13 @@ public class SimpleHoldingService implements HoldingService {
                 .orElse(false);
     }
 
-    private HoldingEntity getOrCreateHolding(Trade trade) {
-        return holdingRepository.findByUserIdAndCryptocurrencySymbol(
-                trade.getUserId(),
-                trade.getCryptocurrencySymbol()
-        ).orElseGet(() -> initializeHolding(trade));
+    private Holding getOrCreateHolding(Trade trade) {
+        return initializeHolding(trade);
     }
 
-    private HoldingEntity initializeHolding(Trade trade) {
-        return holdingRepository.save(toEntity(trade));
+    private Holding initializeHolding(Trade trade) {
+        double initialQuantity = 0;
+        return toModel(holdingRepository.saveIfAbsent(toEntity(trade, initialQuantity)));
     }
 
     private static double getQuantityChange(Trade trade) {
@@ -93,14 +89,14 @@ public class SimpleHoldingService implements HoldingService {
         };
     }
 
-    private double calculateNewQuantity(HoldingEntity entity, double quantityChange) {
+    private double calculateNewQuantity(Holding entity, double quantityChange) {
         return entity.getQuantity() + quantityChange;
     }
 
     private double calculateNewAveragePrice(double averagePrice, double currentQuantity, Trade trade) {
         return switch (trade.getOrderType()) {
             case BUY ->
-                    (((currentQuantity * averagePrice) + (trade.getQuantity() * trade.getPricePerUnit())) / currentQuantity + trade.getQuantity());
+                    ((currentQuantity * averagePrice) + (trade.getQuantity() * trade.getPricePerUnit())) / (currentQuantity + trade.getQuantity());
             case SELL -> averagePrice;
             case null -> throw new IllegalArgumentException("Unsupported order type: " + trade.getOrderType());
         };
